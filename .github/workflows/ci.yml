@@ -17,7 +17,7 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - run: dart pub get
+      - run: dart pub get --no-example
       - run: dart format --output=none --set-exit-if-changed .
       - run: dart analyze --fatal-infos
 
@@ -39,7 +39,7 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
-      - run: dart pub ${{ matrix.resolve }}
+      - run: dart pub ${{ matrix.resolve }} --no-example
       - run: dart test
 
   coverage:
@@ -50,7 +50,7 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - run: dart pub get
+      - run: dart pub get --no-example
       - run: dart pub global activate coverage
       - run: dart pub global run coverage:test_with_coverage --package-name=design_token_lints
       - uses: codecov/codecov-action@v5
@@ -91,7 +91,7 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - run: dart pub get
+      - run: dart pub get --no-example
       - run: dart pub global activate pana
       - name: All 160 points
         run: dart pub global run pana --exit-code-threshold 0 .
