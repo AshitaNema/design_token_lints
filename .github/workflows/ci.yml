@@ -28,18 +28,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: minimum SDK, lowest dependencies
-            sdk: "3.10.0"
-            resolve: downgrade
-          - name: stable SDK, latest dependencies
+          - name: minimum SDK
+            sdk: "3.11.0"
+          - name: stable SDK
             sdk: stable
-            resolve: upgrade
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
-      - run: dart pub ${{ matrix.resolve }} --no-example
+      - run: dart pub upgrade --no-example
       - run: dart test
 
   coverage:

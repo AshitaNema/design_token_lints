@@ -32,13 +32,13 @@ final class FixtureProject {
       "name": "flutter",
       "rootUri": "${Uri.directory(p.join(temp.path, '_packages', 'flutter'))}",
       "packageUri": "lib/",
-      "languageVersion": "3.10"
+      "languageVersion": "3.11"
     },
     {
       "name": "$name",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "3.10"
+      "languageVersion": "3.11"
     }
   ]
 }
