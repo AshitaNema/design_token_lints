@@ -1,0 +1,23 @@
+Configuration: design_token_lints.yaml (.)
+
+color: AppColors (lib/design_system/app_colors.dart) — 4 tokens
+  AppColors.primary = 0xFF1E88E5
+  AppColors.onPrimary = 0xFFFFFFFF
+  AppColors.surface = 0xFFFAFAFA
+  AppColors.danger = 0xFFD32F2F
+spacing: AppSpacing (lib/design_system/app_spacing.dart) — 4 tokens
+  AppSpacing.xs = 4
+  AppSpacing.sm = 8
+  AppSpacing.md = 16
+  AppSpacing.lg = 24
+radius: AppRadius (lib/design_system/app_radius.dart) — 2 tokens
+  AppRadius.sm = 4
+  AppRadius.md = 8
+typography: AppTypography (lib/design_system/app_typography.dart) — 2 tokens
+  AppTypography.body = TextStyle(fontSize: 14, fontWeight: 400)
+  AppTypography.title = TextStyle(fontSize: 22, fontWeight: 700)
+shadow: AppShadows (lib/design_system/app_shadows.dart) — 1 token
+  AppShadows.card = List<BoxShadow>(1 layer)
+components:
+  ElevatedButton -> AppButton (package:acme/design_system/components.dart)
+  Text -> AppText (package:acme/design_system/components.dart)

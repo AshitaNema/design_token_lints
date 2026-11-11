@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Format and analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: dart analyze --fatal-infos
+
+  test:
+    name: Test (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: minimum SDK, lowest dependencies
+            sdk: "3.10.0"
+            resolve: downgrade
+          - name: stable SDK, latest dependencies
+            sdk: stable
+            resolve: upgrade
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
+      - run: dart pub ${{ matrix.resolve }}
+      - run: dart test
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - run: dart pub global activate coverage
+      - run: dart pub global run coverage:test_with_coverage --package-name=design_token_lints
+      - uses: codecov/codecov-action@v5
+        with:
+          files: coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  example:
+    name: Example app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+        working-directory: example
+      - name: The clean screen has no diagnostics
+        working-directory: example
+        run: dart analyze lib/screens/checkout.dart
+      - name: The legacy screen is reported by every rule
+        working-directory: example
+        run: |
+          set +e
+          dart analyze lib/screens/legacy_checkout.dart | tee analyze.txt
+          set -e
+          for rule in avoid_raw_color avoid_magic_spacing avoid_raw_radius \
+            avoid_inline_text_style avoid_raw_shadow prefer_design_system_component; do
+            grep -q "$rule" analyze.txt || { echo "Missing $rule"; exit 1; }
+          done
+
+  pana:
+    name: Package score
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - run: dart pub global activate pana
+      - name: All 160 points
+        run: dart pub global run pana --exit-code-threshold 0 .
+      - run: dart pub publish --dry-run

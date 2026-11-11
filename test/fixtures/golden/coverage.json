@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "filesAnalyzed": 2,
+  "skippedTokens": 0,
+  "totals": {
+    "percent": 41.9,
+    "usages": 13,
+    "findings": 18
+  },
+  "categories": {
+    "color": {
+      "percent": 25.0,
+      "usages": 1,
+      "findings": 3
+    },
+    "spacing": {
+      "percent": 41.7,
+      "usages": 5,
+      "findings": 7
+    },
+    "radius": {
+      "percent": 33.3,
+      "usages": 1,
+      "findings": 2
+    },
+    "typography": {
+      "percent": 50.0,
+      "usages": 2,
+      "findings": 2
+    },
+    "shadow": {
+      "percent": 50.0,
+      "usages": 1,
+      "findings": 1
+    },
+    "component": {
+      "percent": 50.0,
+      "usages": 3,
+      "findings": 3
+    }
+  },
+  "rules": {
+    "avoid_raw_color": 3,
+    "avoid_magic_spacing": 7,
+    "avoid_raw_radius": 2,
+    "avoid_inline_text_style": 2,
+    "avoid_raw_shadow": 1,
+    "prefer_design_system_component": 3
+  },
+  "files": [
+    {
+      "path": "lib/screens/legacy_checkout.dart",
+      "findings": [
+        {
+          "rule": "avoid_magic_spacing",
+          "line": 5,
+          "column": 35,
+          "message": "Magic spacing value '16'.",
+          "suggestedToken": "AppSpacing.md"
+        },
+        {
+          "rule": "avoid_magic_spacing",
+          "line": 6,
+          "column": 52,
+          "message": "Magic spacing value '12'.",
+          "suggestedToken": null
+        },
+        {
+          "rule": "avoid_magic_spacing",
+          "line": 6,
+          "column": 66,
+          "message": "Magic spacing value '20'.",
+          "suggestedToken": null
+        },
+        {
+          "rule": "avoid_raw_color",
+          "line": 8,
+          "column": 14,
+          "message": "Raw color 'const Color(0xFF1E88E5)' bypasses the design system.",
+          "suggestedToken": "AppColors.primary"
+        },
+        {
+          "rule": "avoid_raw_radius",
+          "line": 9,
+          "column": 21,
+          "message": "Raw corner radius 'BorderRadius.circular(8)'.",
+          "suggestedToken": "AppRadius.md"
+        },
+        {
+          "rule": "avoid_raw_shadow",
+          "line": 10,
+          "column": 18,
+          "message": "Hand-written shadow bypasses the design system.",
+          "suggestedToken": "AppShadows.card"
+        },
+        {
+          "rule": "avoid_raw_color",
+          "line": 12,
+          "column": 18,
+          "message": "Raw color 'Color(0x1A000000)' bypasses the design system.",
+          "suggestedToken": null
+        },
+        {
+          "rule": "avoid_magic_spacing",
+          "line": 18,
+          "column": 34,
+          "message": "Magic spacing value '24'.",
+          "suggestedToken": "AppSpacing.lg"
+        },
+        {
+          "rule": "avoid_magic_spacing",
+          "line": 18,
+          "column": 46,
+          "message": "Magic spacing value '13'.",
+          "suggestedToken": null
+        },
+        {
+          "rule": "prefer_design_system_component",
+          "line": 20,
+          "column": 9,
+          "message": "'Text' has a design-system replacement.",
+          "suggestedToken": "AppText"
+        },
+        {
+          "rule": "avoid_inline_text_style",
+          "line": 22,
+          "column": 12,
+          "message": "Inline TextStyle bypasses the design system.",
+          "suggestedToken": "AppTypography.title"
+        },
+        {
+          "rule": "prefer_design_system_component",
+          "line": 24,
+          "column": 9,
+          "message": "'Text' has a design-system replacement.",
+          "suggestedToken": "AppText"
+        },
+        {
+          "rule": "avoid_inline_text_style",
+          "line": 24,
+          "column": 32,
+          "message": "Inline TextStyle bypasses the design system.",
+          "suggestedToken": null
+        },
+        {
+          "rule": "avoid_raw_color",
+          "line": 24,
+          "column": 63,
+          "message": "Raw color 'Colors.red' bypasses the design system.",
+          "suggestedToken": null
+        },
+        {
+          "rule": "prefer_design_system_component",
+          "line": 25,
+          "column": 3,
+          "message": "'ElevatedButton' has a design-system replacement.",
+          "suggestedToken": "AppButton"
+        },
+        {
+          "rule": "avoid_magic_spacing",
+          "line": 27,
+          "column": 42,
+          "message": "Magic spacing value '3'.",
+          "suggestedToken": null
+        },
+        {
+          "rule": "avoid_magic_spacing",
+          "line": 27,
+          "column": 50,
+          "message": "Magic spacing value '5'.",
+          "suggestedToken": null
+        },
+        {
+          "rule": "avoid_raw_radius",
+          "line": 29,
+          "column": 47,
+          "message": "Raw corner radius 'BorderRadius.circular(10)'.",
+          "suggestedToken": null
+        }
+      ]
+    }
+  ]
+}

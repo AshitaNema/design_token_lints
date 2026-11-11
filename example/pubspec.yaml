@@ -1,0 +1,15 @@
+name: acme_shop
+description: >-
+  A small Flutter app that uses design_token_lints to enforce its own design
+  system.
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

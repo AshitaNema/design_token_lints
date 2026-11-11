@@ -1,0 +1,15 @@
+.dart_tool/
+.packages
+pubspec.lock
+build/
+coverage/
+doc/api/
+.DS_Store
+.idea/
+*.iml
+.vscode/
+example/.dart_tool/
+example/build/
+example/pubspec.lock
+example/.flutter-plugins-dependencies
+doc/*.mov

@@ -1,0 +1,5 @@
+name: acme
+publish_to: none
+
+environment:
+  sdk: ^3.10.0

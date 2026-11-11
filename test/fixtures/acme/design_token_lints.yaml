@@ -1,0 +1,15 @@
+design_system:
+  paths: [lib/design_system/**]
+tokens:
+  color: { class: AppColors, file: lib/design_system/app_colors.dart }
+  spacing: { class: AppSpacing, file: lib/design_system/app_spacing.dart }
+  radius: { class: AppRadius, file: lib/design_system/app_radius.dart }
+  typography: { class: AppTypography, file: lib/design_system/app_typography.dart }
+  shadow: { class: AppShadows, file: lib/design_system/app_shadows.dart }
+allow:
+  color: [Colors.transparent]
+  spacing: [0]
+components:
+  ElevatedButton: { replacement: AppButton, import: 'package:acme/design_system/components.dart' }
+  Text: { replacement: AppText, import: 'package:acme/design_system/components.dart' }
+exclude: ["**/*.g.dart", "test/**"]
