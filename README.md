@@ -3,7 +3,7 @@
 [![pub package](https://img.shields.io/pub/v/design_token_lints.svg)](https://pub.dev/packages/design_token_lints)
 [![CI](https://github.com/AshitaNema/design_token_lints/actions/workflows/ci.yml/badge.svg)](https://github.com/AshitaNema/design_token_lints/actions/workflows/ci.yml)
 [![coverage](https://codecov.io/gh/AshitaNema/design_token_lints/branch/main/graph/badge.svg)](https://codecov.io/gh/AshitaNema/design_token_lints)
-[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AshitaNema/design_token_lints/blob/main/LICENSE)
 
 design_token_lints enforces *your* design system, not a generic style guide.
 Point it at the token classes you already have and the components that replace
@@ -15,9 +15,9 @@ plugin system: no annotations, no codegen, no custom_lint. Inspired by Pat
 O'Brien's [design_system_lints](https://pub.dev/packages/design_system_lints),
 which pioneered design-system linting on the Sidecar framework.
 
-![Quick fix replacing a raw color with a token](doc/quick_fix.gif)
+![Quick fix replacing a raw color with a token](https://raw.githubusercontent.com/AshitaNema/design_token_lints/main/doc/quick_fix.gif)
 
-Videos: [quick fixes in VS Code](doc/quick_fix.mp4) (49 s: a color, `Text` to `AppText`, an inline `TextStyle`, a radius and a button, with the import added each time), and a [terminal demo](doc/demo.mp4) of `dart analyze` and `design_token_lints coverage` on the example app, taking coverage from 43% to 90%.
+Videos: [quick fixes in VS Code](https://github.com/AshitaNema/design_token_lints/blob/main/doc/quick_fix.mp4) (49 s: a color, `Text` to `AppText`, an inline `TextStyle`, a radius and a button, with the import added each time), and a [terminal demo](https://github.com/AshitaNema/design_token_lints/blob/main/doc/demo.mp4) of `dart analyze` and `design_token_lints coverage` on the example app, taking coverage from 43% to 90%.
 
 ## Set up in 30 seconds
 
@@ -437,4 +437,4 @@ Not in 0.1.0, in no particular order:
 - The CIEDE2000 implementation is checked against the reference data of Sharma,
   Wu and Dalal, *The CIEDE2000 Color-Difference Formula* (2005).
 
-Licensed under the [MIT License](LICENSE).
+Licensed under the [MIT License](https://github.com/AshitaNema/design_token_lints/blob/main/LICENSE).

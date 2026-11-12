@@ -1,6 +1,5 @@
 .dart_tool/
 .packages
-pubspec.lock
 build/
 coverage/
 doc/api/
@@ -11,5 +10,6 @@ doc/api/
 example/.dart_tool/
 example/build/
 example/pubspec.lock
+test/fixtures/**/pubspec.lock
 example/.flutter-plugins-dependencies
 doc/*.mov

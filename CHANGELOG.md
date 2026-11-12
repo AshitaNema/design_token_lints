@@ -1,3 +1,8 @@
+## 0.1.1
+
+- Fix the README on pub.dev: the demo GIF, the video links and the license
+  links now use absolute URLs, so they render outside GitHub.
+
 ## 0.1.0
 
 First release.

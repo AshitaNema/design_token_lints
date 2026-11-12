@@ -3,7 +3,7 @@ description: >-
   Enforce your Flutter design system: flag raw colors, magic spacing, inline
   text styles and off-system widgets, auto-fix to your own tokens, and measure
   design-system coverage.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/AshitaNema/design_token_lints
 issue_tracker: https://github.com/AshitaNema/design_token_lints/issues
 documentation: https://github.com/AshitaNema/design_token_lints#readme
