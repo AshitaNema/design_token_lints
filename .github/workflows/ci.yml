@@ -91,6 +91,8 @@ jobs:
           sdk: stable
       - run: dart pub get --no-example
       - run: dart pub global activate pana
+      - name: Install the webp tools pana uses to check screenshots
+        run: sudo apt-get update && sudo apt-get install -y webp
       - name: All 160 points
         run: dart pub global run pana --exit-code-threshold 0 .
       - run: dart pub publish --dry-run

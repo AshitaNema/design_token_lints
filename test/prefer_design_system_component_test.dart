@@ -227,7 +227,7 @@ final a = AppText('x');
     );
   }
 
-  Future<void> test_existing_prefixed_import_is_honoured() async {
+  Future<void> test_existing_prefixed_import_is_honored() async {
     await assertFix(
       '''
 import 'package:flutter/material.dart';

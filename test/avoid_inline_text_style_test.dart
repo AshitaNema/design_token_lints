@@ -227,7 +227,7 @@ const a = TextStyle(fontSize: 12);
 ''');
   }
 
-  Future<void> test_unrecognised_argument_has_no_fix() async {
+  Future<void> test_unrecognized_argument_has_no_fix() async {
     await assertNoFix('''
 $testImports
 const a = TextStyle(

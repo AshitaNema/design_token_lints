@@ -1,3 +1,10 @@
+## 0.1.2
+
+- README: a shorter introduction, a table of contents, a getting-started
+  section with requirements, a link to the example app, a comparison with
+  related tools, and a grouped roadmap.
+- Add a pub.dev screenshot of the quick fix.
+
 ## 0.1.1
 
 - Fix the README on pub.dev: the demo GIF, the video links and the license

@@ -95,7 +95,9 @@ disagree.
 
 - Number-valued rules (spacing, radius) report at the literal, so a surrounding
   constructor is kept, and match with `NearestTokenMatcher.matchNumber`.
-- Colors match on ARGB, then on CIEDE2000 in CIE L*a*b* with equal alpha.
+- Colors match on ARGB, then on CIEDE2000 in CIE L*a*b* with equal alpha. The
+  implementation is tested against the reference data in Sharma, Wu and Dalal,
+  *The CIEDE2000 Color-Difference Formula* (2005).
 - Typography and shadows match structurally and only exactly.
 - Constructors are recognized by name, so most rules need only the parsed tree.
   `Colors.*` and the classes under `components:` are checked through the
@@ -124,7 +126,7 @@ suggestion, and edits the file. The plugin API registers one producer per fix
 kind, so ranks are separate registrations: up to two exact fixes and three
 nearest ones, with ids `design_token_lints.fix.<rule>[.nearest][.<n>]`. Exact
 fixes outrank nearest ones. Imports go through `importLibraryElement`, which
-reuses an existing import and honours its prefix.
+reuses an existing import and honors its prefix.
 
 ## Coverage
 

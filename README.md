@@ -1,32 +1,43 @@
 # design_token_lints
 
 [![pub package](https://img.shields.io/pub/v/design_token_lints.svg)](https://pub.dev/packages/design_token_lints)
+[![pub points](https://img.shields.io/pub/points/design_token_lints)](https://pub.dev/packages/design_token_lints/score)
 [![CI](https://github.com/AshitaNema/design_token_lints/actions/workflows/ci.yml/badge.svg)](https://github.com/AshitaNema/design_token_lints/actions/workflows/ci.yml)
 [![coverage](https://codecov.io/gh/AshitaNema/design_token_lints/branch/main/graph/badge.svg)](https://codecov.io/gh/AshitaNema/design_token_lints)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AshitaNema/design_token_lints/blob/main/LICENSE)
 
-design_token_lints enforces *your* design system, not a generic style guide.
-Point it at the token classes you already have and the components that replace
-raw widgets; it flags raw colours, magic spacing, inline text styles and
-hand-rolled radii and shadows in your IDE and in `dart analyze`, quick-fixes
-them to the matching token, and `design_token_lints coverage` tells you how
-much of your UI actually uses the system. Built on Dart's official analyzer
-plugin system: no annotations, no codegen, no custom_lint. Inspired by Pat
-O'Brien's [design_system_lints](https://pub.dev/packages/design_system_lints),
-which pioneered design-system linting on the Sidecar framework.
+Lint rules for your Flutter design system, built on Dart's official analyzer
+plugin system.
+
+- **Flag** raw colors, magic spacing, hand-written radii, text styles and
+  shadows, and raw widgets that have a design-system replacement, in your IDE
+  and in `dart analyze`.
+- **Fix** each one with a quick fix that inserts the matching token from your
+  own classes (`AppColors.primary`, `AppSpacing.md`) and adds the import.
+- **Measure** how much of your UI uses the design system with
+  `design_token_lints coverage`, and fail CI below a threshold.
 
 ![Quick fix replacing a raw color with a token](https://raw.githubusercontent.com/AshitaNema/design_token_lints/main/doc/quick_fix.gif)
 
-Videos: [quick fixes in VS Code](https://github.com/AshitaNema/design_token_lints/blob/main/doc/quick_fix.mp4) (49 s: a color, `Text` to `AppText`, an inline `TextStyle`, a radius and a button, with the import added each time), and a [terminal demo](https://github.com/AshitaNema/design_token_lints/blob/main/doc/demo.mp4) of `dart analyze` and `design_token_lints coverage` on the example app, taking coverage from 43% to 90%.
+Watch: [quick fixes in VS Code](https://github.com/AshitaNema/design_token_lints/blob/main/doc/quick_fix.mp4) ·
+[coverage from 43% to 90% in the terminal](https://github.com/AshitaNema/design_token_lints/blob/main/doc/demo.mp4)
 
-## Set up in 30 seconds
+**Contents:** [Getting started](#getting-started) ·
+[Example app](#example-app) · [What it reports](#what-it-reports) ·
+[Configuration](#configuration) · [Rules](#rules) · [Coverage](#coverage) ·
+[Limitations](#limitations) · [How this compares](#how-this-compares) ·
+[Roadmap](#roadmap)
+
+## Getting started
+
+**Requirements:** Dart 3.11 or later (`dart --version`).
 
 1. Tell the analyzer to load the plugin, in the `analysis_options.yaml` at the
    root of your package (or workspace):
 
    ```yaml
    plugins:
-     design_token_lints: ^0.1.0
+     design_token_lints: ^0.1.2
    ```
 
 2. Describe your design system. Add this to the same file, or to a
@@ -47,9 +58,26 @@ Videos: [quick fixes in VS Code](https://github.com/AshitaNema/design_token_lint
 Nothing is reported for a category until you configure its tokens, so you can
 adopt one category at a time.
 
+> **Note:** on the command line and in CI, run `dart analyze`.
+> `flutter analyze` does not show analyzer plugin diagnostics, so with it the
+> plugin looks like it is doing nothing.
+
 Install the plugin only through `analysis_options.yaml`, never as a dependency in
 `pubspec.yaml`. The analysis server resolves plugins in its own package, so
 adding it to `pubspec.yaml` would only add its analyzer constraint to your app.
+
+## Example app
+
+The [example app](https://github.com/AshitaNema/design_token_lints/tree/main/example) is a small shop with a design system
+in `lib/design_system/` and two versions of the same checkout screen:
+
+- [`legacy_checkout.dart`](https://github.com/AshitaNema/design_token_lints/blob/main/example/lib/screens/legacy_checkout.dart)
+  is written with raw values and reports 23 issues;
+- [`checkout.dart`](https://github.com/AshitaNema/design_token_lints/blob/main/example/lib/screens/checkout.dart) uses the
+  tokens and components and reports none.
+
+Open the example in your IDE to try the quick fixes, or run
+`design_token_lints coverage` in it.
 
 ## What it reports
 
@@ -71,7 +99,7 @@ and a `diagnostics` section:
 ```yaml
 plugins:
   design_token_lints:
-    version: ^0.1.0
+    version: ^0.1.2
     diagnostics:
       avoid_raw_shadow: false
       avoid_magic_spacing: error
@@ -395,46 +423,41 @@ Run the plugin's diagnostics in CI with `dart analyze`:
 
 ## How this compares
 
-Each of these is a good tool; they answer different questions. This table only
-states what the packages describe about themselves.
+Compared with tools that also target design tokens or banned usages, as each
+project documents itself (November 2026):
 
-| Package | Focus | Built on |
-| --- | --- | --- |
-| design_token_lints | Your own design tokens and components: flag, fix, and measure adoption | Analyzer plugin |
-| [design_system_lints](https://pub.dev/packages/design_system_lints) | Lints and code edits for UI standards in a codebase | Sidecar |
-| [clean_code_lints](https://pub.dev/packages/clean_code_lints) | Clean architecture and clean code rules | Analyzer plugin |
-| [altive_lints](https://pub.dev/packages/altive_lints) | A recommended rule selection, with optional analyzer plugin integration | Lint presets and analyzer plugin |
-| [many_lints](https://pub.dev/packages/many_lints) | A broad collection of Flutter and Dart rules, fixes and assists | Analyzer plugin |
-| [house_rules](https://pub.dev/packages/house_rules) | Project rules written in YAML: design tokens, layering, widgets, state management | YAML-defined rules |
-| [DCM](https://dcm.dev) `banned-usage` | A commercial code-quality tool; ban configured usages | DCM |
+| | design_token_lints | [house_rules](https://pub.dev/packages/house_rules) | [design_system_lints](https://pub.dev/packages/design_system_lints) | [DCM](https://dcm.dev) `banned-usage` |
+| --- | --- | --- | --- | --- |
+| Runs in | IDE and `dart analyze` (analyzer plugin) | Command line and editor hook | IDE (Sidecar plugin) | IDE and command line |
+| Analysis | Parsed code, plus resolved elements for `Colors` and components | Parsed code and source text; no resolved types | Not documented | Not documented |
+| Token source | Your existing `static const` classes | String-keyed token maps and a palette class | Classes annotated with `@designSystem` | None: you list banned names |
+| Fix to your token | Exact and nearest matches, import added | Suggestions only ("did you mean") | "Code edits", not described | Not documented |
+| Coverage metric | Yes, with a CI threshold | Not documented; a baseline of finding counts | Not documented | Not documented |
+| Price, latest release | Free (MIT), 2026 | Free (MIT), 2026 | Free (MIT), 2023 | Paid plans |
 
-If you want rules that are about *your* token classes, with fixes that insert
-*your* constants and a coverage number to track, this package is aimed at that.
-If you want a general rule set, one of the others is a better start. They
-combine well, since plugins live side by side in `analysis_options.yaml`.
+General rule sets such as [many_lints](https://pub.dev/packages/many_lints),
+[altive_lints](https://pub.dev/packages/altive_lints) and
+[clean_code_lints](https://pub.dev/packages/clean_code_lints) cover different
+ground and run side by side with this plugin in `analysis_options.yaml`.
 
 ## Roadmap
 
-Not in 0.1.0, in no particular order:
+- **More token sources:** `ThemeExtension` tokens, and importing tokens from
+  Figma, Tokens Studio and the W3C Design Tokens format.
+- **More categories:** icon sizes, elevation, and opacity (`withValues`).
+- **Gradual adoption:** a baseline file that accepts existing findings, so only
+  new raw values are reported.
+- **CI output:** SARIF from the coverage command.
+- **Plugin platform:** per-rule options in `analysis_options.yaml` once the SDK
+  supports them ([dart-lang/sdk#63098](https://github.com/dart-lang/sdk/issues/63098)),
+  and bulk fixes with `dart fix` once plugin fixes allow it.
 
-- opacity and `withValues` handling;
-- icon-size and elevation tokens;
-- `ThemeExtension`-based tokens;
-- importing tokens from Figma, Tokens Studio and the W3C design tokens format;
-- a baseline file for gradual adoption;
-- SARIF output for the coverage command;
-- bulk application of fixes (`dart fix`), if and when plugin fixes support it;
-- per-rule options in `analysis_options.yaml`, once the SDK supports options
-  for plugins (dart-lang/sdk#63099 or a successor).
+Suggestions are welcome in the [issue tracker](https://github.com/AshitaNema/design_token_lints/issues).
 
-## Credits
+## Acknowledgements
 
-- [design_system_lints](https://pub.dev/packages/design_system_lints) by Pat
-  O'Brien, for showing that a design system can be linted.
-- [many_lints](https://pub.dev/packages/many_lints), whose approach of reading a
-  configuration file from the package root this package follows.
-- The Dart team's `analysis_server_plugin` and `analyzer_testing` packages.
-- The CIEDE2000 implementation is checked against the reference data of Sharma,
-  Wu and Dalal, *The CIEDE2000 Color-Difference Formula* (2005).
+Pat O'Brien's [design_system_lints](https://pub.dev/packages/design_system_lints)
+first showed that a design system can be linted. Thanks to the Dart team for the
+analyzer plugin system this package is built on.
 
 Licensed under the [MIT License](https://github.com/AshitaNema/design_token_lints/blob/main/LICENSE).

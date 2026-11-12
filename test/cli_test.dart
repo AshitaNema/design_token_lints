@@ -132,7 +132,7 @@ void main() {
       expect(result.out, contains('no raw values found'));
     });
 
-    test('rule-specific excludes are honoured', () async {
+    test('rule-specific excludes are honored', () async {
       final config = File(p.join(project.root, 'design_token_lints.yaml'));
       project.write(
         'design_token_lints.yaml',
