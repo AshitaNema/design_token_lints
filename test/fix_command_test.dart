@@ -251,6 +251,18 @@ final a = [
     });
   });
 
+  test('configuration warnings are printed and fixing goes on', () async {
+    project.write('design_token_lints.yaml', '''
+${read('design_token_lints.yaml')}
+unknown_key: true
+''');
+    final result = await run(['fix', '--rule', 'avoid_magic_spacing']);
+    expect(result.code, ExitCodes.ok);
+    expect(result.err, contains('warning: '));
+    expect(result.err, contains('unknown_key'));
+    expect(read(legacy), contains('EdgeInsets.all(AppSpacing.md)'));
+  });
+
   group('fix exit code 2', () {
     test('unknown rule', () async {
       final result = await run(['fix', '--rule', 'no_such_rule']);
