@@ -1,0 +1,32 @@
+import 'package:acme/design_system/app_colors.dart';
+import 'package:acme/design_system/app_radius.dart';
+import 'package:acme/design_system/app_shadows.dart';
+import 'package:acme/design_system/app_spacing.dart';
+import 'package:acme/design_system/app_typography.dart';
+import 'package:acme/design_system/components.dart';
+import 'package:flutter/material.dart';
+
+List<Widget> legacyCheckout() => [
+  Container(
+    padding: const EdgeInsets.all(AppSpacing.md),
+    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+    decoration: BoxDecoration(
+      color: AppColors.primary,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      boxShadow: AppShadows.card,
+    ),
+    child: const SizedBox(width: AppSpacing.lg, height: 13),
+  ),
+  const AppText(
+    'Total',
+    style: AppTypography.title,
+  ),
+  const AppText('Pay now', style: TextStyle(fontSize: 13, color: Colors.red)),
+  AppButton(onPressed: null, child: const SizedBox()),
+  Padding(
+    padding: const EdgeInsets.only(left: 3, top: 5),
+    child: Container(
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+    ),
+  ),
+];
