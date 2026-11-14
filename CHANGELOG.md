@@ -1,4 +1,6 @@
-## Unreleased
+## 0.2.0
+
+Adoption: easier to switch on in an existing app.
 
 - New `design_token_lints baseline` command: records the current raw values
   in `design_token_lints.baseline.yaml`, and the plugin then reports only new
