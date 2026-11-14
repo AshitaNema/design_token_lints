@@ -13,9 +13,12 @@ plugin system.
   shadows, and raw widgets that have a design-system replacement, in your IDE
   and in `dart analyze`.
 - **Fix** each one with a quick fix that inserts the matching token from your
-  own classes (`AppColors.primary`, `AppSpacing.md`) and adds the import.
+  own classes (`AppColors.primary`, `AppSpacing.md`) and adds the import, or
+  all of them at once with `design_token_lints fix`.
 - **Measure** how much of your UI uses the design system with
   `design_token_lints coverage`, and fail CI below a threshold.
+- **Adopt gradually** in an existing app: `design_token_lints baseline`
+  accepts today's raw values, so only new ones are reported.
 
 ![Quick fix replacing a raw color with a token](https://raw.githubusercontent.com/AshitaNema/design_token_lints/main/doc/quick_fix.gif)
 
@@ -39,7 +42,7 @@ Watch: [quick fixes in VS Code](https://github.com/AshitaNema/design_token_lints
 
    ```yaml
    plugins:
-     design_token_lints: ^0.1.2
+     design_token_lints: ^0.2.0
    ```
 
 2. Describe your design system. Add this to the same file, or to a
@@ -101,7 +104,7 @@ and a `diagnostics` section:
 ```yaml
 plugins:
   design_token_lints:
-    version: ^0.1.2
+    version: ^0.2.0
     diagnostics:
       avoid_raw_shadow: false
       avoid_magic_spacing: error
