@@ -120,6 +120,9 @@ final class ProjectAnalyzer {
       onFile: (visit) {
         final result = visit.result;
         final findings = visit.findings();
+        final matcher = visit.project.baseline.matcherFor(
+          visit.project.relativePath(visit.path),
+        );
         final counter = UsageCounter(visit.project, visit.active);
         result.unit.accept(counter);
 
@@ -141,7 +144,11 @@ final class ProjectAnalyzer {
               ),
               findings: [
                 for (final finding in findings)
-                  _toReportFinding(finding, result),
+                  _toReportFinding(
+                    finding,
+                    result,
+                    baselined: matcher.accepts(finding),
+                  ),
               ],
             ),
           );
@@ -281,8 +288,9 @@ final class ProjectAnalyzer {
 
   static ReportFinding _toReportFinding(
     Finding finding,
-    ResolvedUnitResult result,
-  ) {
+    ResolvedUnitResult result, {
+    required bool baselined,
+  }) {
     final location = result.lineInfo.getLocation(finding.offset);
     return ReportFinding(
       rule: finding.rule,
@@ -292,6 +300,7 @@ final class ProjectAnalyzer {
         finding.rule,
       ).problemMessage.replaceAll('{0}', finding.raw),
       suggestedToken: finding.best?.reference,
+      baselined: baselined,
     );
   }
 

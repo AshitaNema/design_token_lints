@@ -140,6 +140,21 @@ file gets one `ChangeBuilder` edit, so imports are added once, and the edits
 are applied with `SourceEdit.applySequence`. Files are written only after the
 whole project has been analyzed without configuration errors.
 
+## Baseline
+
+`Baseline` (`lib/src/config/baseline.dart`) maps a file, relative to the
+configuration, to rules, to a finding's code as `toSource()` prints it, to a
+count. `ConfigLoader` reads `design_token_lints.baseline.yaml` next to the
+configuration and watches its stamp like the other files. A
+`BaselineMatcher` per file accepts up to the recorded count of each identity,
+in source order; the rule and `ProjectAnalyzer` both see findings in source
+order, so the IDE and the coverage report agree on which ones are accepted.
+
+The analysis server applies `// ignore:` comments after the plugin reports, so
+the matcher also sees ignored findings. `BaselineWriter` therefore records
+every finding, ignored or not. When it runs on a subdirectory it keeps the
+entries for files outside it.
+
 ## Coverage
 
 `ProjectAnalyzer` builds an `AnalysisContextCollection` over the target

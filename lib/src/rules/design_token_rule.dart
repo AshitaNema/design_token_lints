@@ -3,6 +3,7 @@ import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../config/baseline.dart';
 import '../config/config_loader.dart';
 import '../config/rule_id.dart';
 import '../detectors/detector.dart';
@@ -139,8 +140,23 @@ final class DesignTokenRule extends AnalysisRule {
     void report(Finding finding) =>
         reportAtNode(finding.node, arguments: finding.messageArguments);
 
+    // Findings arrive in source order, which the baseline relies on.
+    final baseline = project.baseline;
+    final matchers = <String, BaselineMatcher>{};
+    bool isBaselined(Finding finding) {
+      if (baseline.isEmpty) return false;
+      final path = context.currentUnit?.file.path;
+      if (path == null) return false;
+      return matchers
+          .putIfAbsent(
+            path,
+            () => baseline.matcherFor(project.relativePath(path)),
+          )
+          .accepts(finding);
+    }
+
     final visitor = DetectorVisitor(detector, (finding) {
-      if (isChecked(context)) report(finding);
+      if (isChecked(context) && !isBaselined(finding)) report(finding);
     });
     for (final kind in detector.nodeKinds) {
       switch (kind) {

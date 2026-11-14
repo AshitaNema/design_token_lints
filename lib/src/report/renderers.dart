@@ -66,6 +66,14 @@ String _percent(double? value) => value == null ? 'n/a' : '${value.round()}%';
 
 String _plural(int count, String one, String many) => count == 1 ? one : many;
 
+/// `, N raw values are in the baseline` when a baseline accepts any.
+String _baselineNote(CoverageReport report) {
+  final count = report.baselinedFindings;
+  if (count == 0) return '';
+  return ', $count raw ${_plural(count, 'value is', 'values are')} in the '
+      'baseline';
+}
+
 /// The one-line summary used by the console output.
 String summaryLine(CoverageReport report) {
   final parts = [
@@ -150,6 +158,7 @@ String renderConsole(CoverageReport report) {
       'could not be evaluated',
     );
   }
+  out.write(_baselineNote(report));
   out.writeln('.');
   return out.toString();
 }
@@ -167,6 +176,7 @@ String renderJson(CoverageReport report) {
     'schemaVersion': jsonSchemaVersion,
     'filesAnalyzed': report.filesAnalyzed,
     'skippedTokens': report.skippedTokens,
+    'baselined': report.baselinedFindings,
     'totals': stats(report.overall),
     'categories': {
       for (final MapEntry(key: category, value: s) in report.categories.entries)
@@ -189,6 +199,7 @@ String renderJson(CoverageReport report) {
                 'column': finding.column,
                 'message': finding.message,
                 'suggestedToken': finding.suggestedToken,
+                'baselined': finding.baselined,
               },
           ],
         },
@@ -237,7 +248,8 @@ String renderMarkdown(CoverageReport report) {
     ..writeln()
     ..writeln(
       '<sub>${report.filesAnalyzed} '
-      '${_plural(report.filesAnalyzed, 'file', 'files')} checked.</sub>',
+      '${_plural(report.filesAnalyzed, 'file', 'files')} checked'
+      '${_baselineNote(report)}.</sub>',
     );
   return out.toString();
 }
