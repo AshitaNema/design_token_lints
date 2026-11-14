@@ -1,5 +1,10 @@
 ## Unreleased
 
+- New `design_token_lints baseline` command: records the current raw values
+  in `design_token_lints.baseline.yaml`, and the plugin then reports only new
+  ones. Values are matched by file, rule and code, so moving or reformatting
+  code keeps them accepted. `coverage` still counts them, and reports how many
+  are baselined (`baselined` in the JSON report).
 - New `design_token_lints fix` command: applies every exact-token fix in a
   project at once, with imports, honoring `// ignore:` comments. Nearest
   matches and values that match two tokens are listed, not changed.

@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import '../config/config.dart';
 import '../config/rule_id.dart';
 import '../fixes/bulk_fixer.dart';
+import '../report/baseline_writer.dart';
 import '../report/project_analyzer.dart';
 import '../report/renderers.dart';
 import '../tokens/token_value.dart';
@@ -88,6 +89,7 @@ Future<int> runCli(
   return switch (command.name) {
     'coverage' => _coverage(command, root, resources, stdoutSink, stderrSink),
     'fix' => _fix(command, root, resources, stdoutSink, stderrSink),
+    'baseline' => _baseline(root, resources, stdoutSink, stderrSink),
     _ => _checkConfig(root, resources, stdoutSink, stderrSink),
   };
 }
@@ -133,6 +135,7 @@ ArgParser _buildParser() {
       valueHelp: 'avoid_raw_color',
     )
     ..addFlag('help', abbr: 'h', negatable: false);
+  parser.addCommand('baseline').addFlag('help', abbr: 'h', negatable: false);
   parser
       .addCommand('check-config')
       .addFlag('help', abbr: 'h', negatable: false);
@@ -147,6 +150,7 @@ String _usage(ArgParser parser) =>
     'Commands:\n'
     '  coverage       Measure how much of the UI uses the design system.\n'
     '  fix            Replace raw values that match exactly one token.\n'
+    '  baseline       Accept the current raw values; report only new ones.\n'
     '  check-config   Validate the configuration and print the tokens found.\n'
     '\n'
     'Run "design_token_lints <command> --help" for the options of a command.\n';
@@ -344,6 +348,48 @@ Future<int> _fix(
       );
   }
   return dryRun && count > 0 ? ExitCodes.belowThreshold : ExitCodes.ok;
+}
+
+Future<int> _baseline(
+  String root,
+  ResourceProvider provider,
+  StringSink out,
+  StringSink err,
+) async {
+  final outcome = await BaselineWriter(provider).write(root);
+  if (outcome.errors.isNotEmpty) {
+    for (final issue in outcome.errors) {
+      err.writeln('${issue.severity.name}: ${issue.message}');
+    }
+    err.writeln('Nothing was written. Run "design_token_lints check-config".');
+    return ExitCodes.usage;
+  }
+  if (outcome.written.isEmpty) {
+    err.writeln(
+      'No design_token_lints configuration found for "$root". Add a '
+      '`design_token_lints:` section to analysis_options.yaml or create '
+      'design_token_lints.yaml.',
+    );
+    return ExitCodes.usage;
+  }
+  for (final issue in outcome.warnings) {
+    err.writeln('${issue.severity.name}: ${issue.message}');
+  }
+  for (final written in outcome.written) {
+    final shown = p.relative(written.path, from: root);
+    out.writeln(
+      'Wrote $shown: ${written.findings} raw '
+      '${written.findings == 1 ? 'value' : 'values'} in ${written.files} '
+      '${written.files == 1 ? 'file' : 'files'}.',
+    );
+  }
+  out
+    ..writeln()
+    ..writeln(
+      'These are no longer reported; new raw values are. Commit the file, '
+      'and run the command again after fixing some to shrink it.',
+    );
+  return ExitCodes.ok;
 }
 
 /// [raw] on one line, shortened to 40 characters.

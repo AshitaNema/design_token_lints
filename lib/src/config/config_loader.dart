@@ -2,6 +2,7 @@ import 'package:analyzer/file_system/file_system.dart';
 import 'package:yaml/yaml.dart';
 
 import '../tokens/token_index.dart';
+import 'baseline.dart';
 import 'config.dart';
 import 'exemptions.dart';
 import 'package_locator.dart';
@@ -14,7 +15,8 @@ final class ProjectConfig {
     required this.config,
     required this.index,
     required this.provider,
-  });
+    Baseline? baseline,
+  }) : baseline = baseline ?? Baseline.empty;
 
   /// A project without configuration; every rule stays silent.
   factory ProjectConfig.none(ResourceProvider provider, {DtlConfig? config}) =>
@@ -33,11 +35,23 @@ final class ProjectConfig {
   /// The file system the project was read from.
   final ResourceProvider provider;
 
+  /// The findings the project has accepted.
+  final Baseline baseline;
+
+  /// The path of [path] relative to the configuration, with `/` separators,
+  /// as used in the baseline.
+  String relativePath(String path) =>
+      relativePosix(provider.pathContext, config.rootPath, path);
+
   /// Whether any configuration is in effect.
   bool get isActive => config.isPresent;
 
   /// Every problem with the configuration and the token files.
-  List<ConfigIssue> get issues => [...config.issues, ...index.issues];
+  List<ConfigIssue> get issues => [
+    ...config.issues,
+    ...index.issues,
+    ...baseline.issues,
+  ];
 
   /// Whether [rule] has anything to enforce.
   bool isRuleActive(RuleId rule) {
@@ -133,6 +147,7 @@ final class ConfigLoader {
     final watched = <String>{
       childFile(root, 'design_token_lints.yaml').path,
       childFile(root, 'analysis_options.yaml').path,
+      childFile(root, baselineFileName).path,
       ...project.index.watchedPaths,
     };
     cache[root.path] = _CacheEntry(project, {
@@ -148,10 +163,14 @@ final class ConfigLoader {
       if (!config.isPresent) {
         return ProjectConfig.none(provider, config: config);
       }
+      final baselineFile = childFile(root, baselineFileName);
       return ProjectConfig(
         config: config,
         index: TokenIndex.build(config, provider),
         provider: provider,
+        baseline: baselineFile.exists
+            ? Baseline.parse(baselineFile.readAsStringSync())
+            : Baseline.empty,
       );
     } on Object catch (error) {
       return ProjectConfig.none(

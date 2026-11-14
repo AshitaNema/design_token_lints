@@ -35,6 +35,7 @@ final class ReportFinding {
     required this.column,
     required this.message,
     this.suggestedToken,
+    this.baselined = false,
   });
 
   /// The rule that produced it.
@@ -51,6 +52,10 @@ final class ReportFinding {
 
   /// The best replacement, if there is one.
   final String? suggestedToken;
+
+  /// Whether the finding is accepted by the baseline, so the plugin does not
+  /// report it. It still counts as a raw value.
+  final bool baselined;
 }
 
 /// The findings of one file.
@@ -102,6 +107,12 @@ final class CoverageReport {
 
   /// The total number of findings.
   int get totalFindings => files.fold(0, (sum, f) => sum + f.findings.length);
+
+  /// The number of findings accepted by a baseline.
+  int get baselinedFindings => files.fold(
+    0,
+    (sum, f) => sum + f.findings.where((finding) => finding.baselined).length,
+  );
 
   /// The number of findings per rule.
   Map<RuleId, int> get findingsByRule {

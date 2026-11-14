@@ -25,6 +25,7 @@ Watch: [quick fixes in VS Code](https://github.com/AshitaNema/design_token_lints
 **Contents:** [Getting started](#getting-started) ·
 [Example app](#example-app) · [What it reports](#what-it-reports) ·
 [Configuration](#configuration) · [Rules](#rules) · [Fix everything](#fix-everything) ·
+[Baseline](#baseline-for-existing-apps) ·
 [Coverage](#coverage) ·
 [Limitations](#limitations) · [How this compares](#how-this-compares) ·
 [Roadmap](#roadmap)
@@ -360,6 +361,35 @@ design_token_lints fix [path] [--dry-run] [--rule avoid_raw_color,avoid_magic_sp
 fix, so CI can require that exact fixes are applied. `--rule` limits the fix to
 some rules.
 
+## Baseline for existing apps
+
+Switching the plugin on in a large app can report hundreds of raw values at
+once. A baseline accepts today's values, so only new ones are reported:
+
+```sh
+design_token_lints baseline
+```
+
+```text
+Wrote design_token_lints.baseline.yaml: 23 raw values in 1 file.
+```
+
+Commit `design_token_lints.baseline.yaml`; it sits next to the configuration
+and is picked up without restarting the analysis server. From then on the IDE
+and `dart analyze` stay quiet about the accepted values and report every new
+one, so the design system can only gain ground.
+
+- **Moving or reformatting code keeps a value accepted.** A value is identified
+  by its file, its rule and its code (for example `EdgeInsets.all(16)` in
+  `lib/screens/checkout.dart`), not by its line.
+- **Adding the same value again is reported.** The baseline records how many
+  times each value occurs in a file; further occurrences are new.
+- **Coverage stays honest.** `coverage` still counts accepted values as raw
+  values, and says how many are in the baseline.
+- **Shrink it as you go.** After fixing some values (for example with
+  `design_token_lints fix`), run `design_token_lints baseline` again.
+  Running it on a subdirectory rewrites only that part of the file.
+
 ## Coverage
 
 ```sh
@@ -385,6 +415,7 @@ design_token_lints coverage [path] [--format console|json|markdown]
                             [--output file] [--fail-under 80]
                             [--category color,spacing,radius,typography,shadow,component]
 design_token_lints fix [path] [--dry-run] [--rule rule,...]
+design_token_lints baseline [path]
 design_token_lints check-config [path]
 ```
 
@@ -400,8 +431,9 @@ configuration error. `check-config` validates the configuration and prints
 every token it found and every member it skipped.
 
 The JSON report has `totals`, per-`categories` statistics, per-`rules` counts,
-and `files` with each finding's `line`, `column`, `rule`, `message` and
-`suggestedToken`.
+`baselined` (how many findings a baseline accepts), and `files` with each
+finding's `line`, `column`, `rule`, `message`, `suggestedToken` and
+`baselined`.
 
 ### In CI
 
@@ -497,8 +529,6 @@ ground and run side by side with this plugin in `analysis_options.yaml`.
 - **More token sources:** `ThemeExtension` tokens, and importing tokens from
   Figma, Tokens Studio and the W3C Design Tokens format.
 - **More categories:** icon sizes, elevation, and opacity (`withValues`).
-- **Gradual adoption:** a baseline file that accepts existing findings, so only
-  new raw values are reported.
 - **CI output:** SARIF from the coverage command.
 - **Plugin platform:** per-rule options in `analysis_options.yaml` once the SDK
   supports them ([dart-lang/sdk#63098](https://github.com/dart-lang/sdk/issues/63098)),

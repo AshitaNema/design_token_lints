@@ -1,0 +1,29 @@
+# Findings accepted with "design_token_lints baseline". They
+# are not reported; new ones are. Run the command again after
+# fixing some to shrink this file.
+version: 1
+files:
+  "lib/screens/legacy_checkout.dart":
+    avoid_raw_color:
+      "Color(0x1A000000)": 1
+      "Colors.red": 1
+      "const Color(0xFF1E88E5)": 1
+    avoid_magic_spacing:
+      "12": 1
+      "13": 1
+      "16": 1
+      "20": 1
+      "24": 1
+      "3": 1
+      "5": 1
+    avoid_raw_radius:
+      "BorderRadius.circular(10)": 1
+      "BorderRadius.circular(8)": 1
+    avoid_inline_text_style:
+      "TextStyle(fontSize: 13, color: Colors.red)": 1
+      "TextStyle(fontSize: 22, fontWeight: FontWeight.bold)": 1
+    avoid_raw_shadow:
+      "const [BoxShadow(color: Color(0x1A000000), blurRadius: 8, offset: Offset(0, 2))]": 1
+    prefer_design_system_component:
+      "ElevatedButton": 1
+      "Text": 2
