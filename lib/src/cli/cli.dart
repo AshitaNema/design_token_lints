@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 
 import '../config/config.dart';
 import '../config/rule_id.dart';
+import '../fixes/bulk_fixer.dart';
 import '../report/project_analyzer.dart';
 import '../report/renderers.dart';
 import '../tokens/token_value.dart';
@@ -16,7 +17,8 @@ abstract final class ExitCodes {
   /// Success.
   static const int ok = 0;
 
-  /// Coverage is below `--fail-under`.
+  /// Coverage is below `--fail-under`, or `fix --dry-run` found something
+  /// to fix.
   static const int belowThreshold = 1;
 
   /// Invalid usage, or the configuration has errors.
@@ -85,6 +87,7 @@ Future<int> runCli(
 
   return switch (command.name) {
     'coverage' => _coverage(command, root, resources, stdoutSink, stderrSink),
+    'fix' => _fix(command, root, resources, stdoutSink, stderrSink),
     _ => _checkConfig(root, resources, stdoutSink, stderrSink),
   };
 }
@@ -114,6 +117,22 @@ ArgParser _buildParser() {
       valueHelp: 'color,spacing',
     )
     ..addFlag('help', abbr: 'h', negatable: false);
+  parser.addCommand('fix')
+    ..addFlag(
+      'dry-run',
+      negatable: false,
+      help:
+          'List the fixes without changing any file. Exits with code 1 when '
+          'there is something to fix.',
+    )
+    ..addOption(
+      'rule',
+      help:
+          'Only fix these rules, comma-separated: '
+          '${RuleId.values.map((r) => r.code).join(', ')}.',
+      valueHelp: 'avoid_raw_color',
+    )
+    ..addFlag('help', abbr: 'h', negatable: false);
   parser
       .addCommand('check-config')
       .addFlag('help', abbr: 'h', negatable: false);
@@ -127,6 +146,7 @@ String _usage(ArgParser parser) =>
     '\n'
     'Commands:\n'
     '  coverage       Measure how much of the UI uses the design system.\n'
+    '  fix            Replace raw values that match exactly one token.\n'
     '  check-config   Validate the configuration and print the tokens found.\n'
     '\n'
     'Run "design_token_lints <command> --help" for the options of a command.\n';
@@ -217,6 +237,119 @@ Future<int> _coverage(
     return ExitCodes.belowThreshold;
   }
   return ExitCodes.ok;
+}
+
+Future<int> _fix(
+  ArgResults command,
+  String root,
+  ResourceProvider provider,
+  StringSink out,
+  StringSink err,
+) async {
+  final dryRun = command['dry-run'] == true;
+  Set<RuleId>? rules;
+  final ruleOption = command['rule'] as String?;
+  if (ruleOption != null) {
+    rules = {};
+    for (final name in ruleOption.split(',')) {
+      final rule = RuleId.values.where((r) => r.code == name.trim());
+      if (rule.isEmpty) {
+        err.writeln(
+          'Unknown rule "${name.trim()}". Expected one of '
+          '${RuleId.values.map((r) => r.code).join(', ')}.',
+        );
+        return ExitCodes.usage;
+      }
+      rules.add(rule.single);
+    }
+  }
+
+  final outcome = await BulkFixer(
+    provider,
+  ).fix(root, rules: rules, dryRun: dryRun);
+  if (outcome.errors.isNotEmpty) {
+    for (final issue in outcome.errors) {
+      err.writeln('${issue.severity.name}: ${issue.message}');
+    }
+    err.writeln('Nothing was changed. Run "design_token_lints check-config".');
+    return ExitCodes.usage;
+  }
+  if (!outcome.configured) {
+    err.writeln(
+      'No design_token_lints configuration found for "$root". Add a '
+      '`design_token_lints:` section to analysis_options.yaml or create '
+      'design_token_lints.yaml.',
+    );
+    return ExitCodes.usage;
+  }
+  for (final issue in outcome.warnings) {
+    err.writeln('${issue.severity.name}: ${issue.message}');
+  }
+
+  String? lastPath;
+  for (final fix in outcome.applied) {
+    if (fix.path != lastPath) {
+      if (lastPath != null) out.writeln();
+      out.writeln(fix.path);
+      lastPath = fix.path;
+    }
+    out.writeln(
+      '  ${fix.line}:${fix.column}  ${_short(fix.raw)} -> ${fix.replacement}',
+    );
+  }
+  if (outcome.applied.isNotEmpty) out.writeln();
+
+  final count = outcome.applied.length;
+  final files = outcome.fileCount;
+  final summary =
+      '$count ${count == 1 ? 'issue' : 'issues'} in '
+      '$files ${files == 1 ? 'file' : 'files'}';
+  if (count == 0) {
+    out.writeln('Nothing to fix.');
+  } else if (dryRun) {
+    out.writeln('Would fix $summary. Run without --dry-run to apply.');
+  } else {
+    out.writeln('Fixed $summary. Run "dart format" if any line got too long.');
+  }
+
+  void listSkipped(SkipReason reason, String heading) {
+    final skipped = outcome.skipped.where((s) => s.reason == reason).toList();
+    if (skipped.isEmpty) return;
+    out
+      ..writeln()
+      ..writeln(heading);
+    for (final s in skipped) {
+      out.writeln(
+        '  ${s.path}:${s.line}:${s.column}  ${_short(s.raw)}: '
+        '${s.candidates.join(', ')}',
+      );
+    }
+  }
+
+  listSkipped(
+    SkipReason.ambiguous,
+    'Not fixed, more than one token matches (choose one in your IDE):',
+  );
+  listSkipped(
+    SkipReason.overlap,
+    'Not fixed, inside another fix (run the command again):',
+  );
+  final left = outcome.withoutExactToken;
+  if (left > 0) {
+    out
+      ..writeln()
+      ..writeln(
+        '$left ${left == 1 ? 'issue has' : 'issues have'} no exact token; '
+        '"dart analyze" lists them.',
+      );
+  }
+  return dryRun && count > 0 ? ExitCodes.belowThreshold : ExitCodes.ok;
+}
+
+/// [raw] on one line, shortened to 40 characters.
+String _short(String raw) {
+  final flat = raw.replaceAll(RegExp(r'\s+'), ' ');
+  return flat.length <= 40 ? flat : '${flat.substring(0, 39)}…';
 }
 
 int _checkConfig(

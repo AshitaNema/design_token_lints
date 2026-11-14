@@ -1,5 +1,10 @@
 ## Unreleased
 
+- New `design_token_lints fix` command: applies every exact-token fix in a
+  project at once, with imports, honoring `// ignore:` comments. Nearest
+  matches and values that match two tokens are listed, not changed.
+  `--dry-run` exits with code 1 when there is something to fix; `--rule`
+  limits the rules.
 - `avoid_raw_color`: a translucent color whose red, green and blue equal an
   opaque token now offers a fix to `Token.withValues(alpha: …)`, for example
   `Color(0x801E88E5)` to `AppColors.primary.withValues(alpha: 0.5)`. Not

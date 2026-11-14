@@ -24,7 +24,8 @@ Watch: [quick fixes in VS Code](https://github.com/AshitaNema/design_token_lints
 
 **Contents:** [Getting started](#getting-started) ·
 [Example app](#example-app) · [What it reports](#what-it-reports) ·
-[Configuration](#configuration) · [Rules](#rules) · [Coverage](#coverage) ·
+[Configuration](#configuration) · [Rules](#rules) · [Fix everything](#fix-everything) ·
+[Coverage](#coverage) ·
 [Limitations](#limitations) · [How this compares](#how-this-compares) ·
 [Roadmap](#roadmap)
 
@@ -318,6 +319,47 @@ constructor name and the arguments are kept, and the configured `import` is
 added (or reused, including an existing prefixed import). The fix only renames;
 making the arguments compatible with the replacement is up to you.
 
+## Fix everything
+
+The IDE applies quick fixes one at a time. To apply every exact fix in a
+project at once, use the command line tool:
+
+```sh
+dart pub global activate design_token_lints
+design_token_lints fix --dry-run   # list what would change
+design_token_lints fix             # apply it
+```
+
+```text
+lib/screens/legacy_checkout.dart
+  12:37  16 -> AppSpacing.md
+  15:16  const Color(0xFFFAFAFA) -> AppColors.surface
+  51:11  ElevatedButton -> AppButton
+  ...
+
+Fixed 16 issues in 1 file. Run "dart format" if any line got too long.
+
+7 issues have no exact token; "dart analyze" lists them.
+```
+
+It runs the same detectors as the plugin and adds imports the same way. It
+applies only fixes with exactly one exact token:
+
+- **Nearest matches are never applied.** Turning `15` into `AppSpacing.md`
+  changes the design, so it is left to a person in the IDE.
+- **Two tokens with the same value** are listed, not fixed, so you choose.
+- **A fix inside another fix** (a color inside a shadow that matches a shadow
+  token) is listed; run the command again.
+- `// ignore:` and `// ignore_for_file:` comments are honored.
+
+```text
+design_token_lints fix [path] [--dry-run] [--rule avoid_raw_color,avoid_magic_spacing]
+```
+
+`--dry-run` changes nothing and exits with code `1` when there is something to
+fix, so CI can require that exact fixes are applied. `--rule` limits the fix to
+some rules.
+
 ## Coverage
 
 ```sh
@@ -342,6 +384,7 @@ dependency would add the analyzer's version constraints to your project.
 design_token_lints coverage [path] [--format console|json|markdown]
                             [--output file] [--fail-under 80]
                             [--category color,spacing,radius,typography,shadow,component]
+design_token_lints fix [path] [--dry-run] [--rule rule,...]
 design_token_lints check-config [path]
 ```
 
@@ -426,8 +469,9 @@ Run the plugin's diagnostics in CI with `dart analyze`:
   classes under `components:` are checked through the resolved element.
 - **Tokens must be constant.** `static final` members, getters and values that
   need runtime evaluation (`ThemeExtension` tokens) are not read.
-- **Quick fixes are applied one at a time.** The analysis server does not apply
-  plugin fixes in bulk (`dart fix`).
+- **No `dart fix`.** The analysis server does not apply plugin fixes in bulk,
+  so `dart fix` ignores them. Use [`design_token_lints fix`](#fix-everything)
+  instead.
 
 ## How this compares
 
@@ -458,7 +502,7 @@ ground and run side by side with this plugin in `analysis_options.yaml`.
 - **CI output:** SARIF from the coverage command.
 - **Plugin platform:** per-rule options in `analysis_options.yaml` once the SDK
   supports them ([dart-lang/sdk#63098](https://github.com/dart-lang/sdk/issues/63098)),
-  and bulk fixes with `dart fix` once plugin fixes allow it.
+  and `dart fix` support once plugin fixes allow it.
 
 Suggestions are welcome in the [issue tracker](https://github.com/AshitaNema/design_token_lints/issues).
 

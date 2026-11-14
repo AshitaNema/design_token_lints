@@ -1,0 +1,14 @@
+lib/screens/legacy_checkout.dart
+  5:35  16 -> AppSpacing.md
+  8:14  const Color(0xFF1E88E5) -> AppColors.primary
+  9:21  BorderRadius.circular(8) -> AppRadius.md
+  10:18  BoxShadow list -> AppShadows.card
+  18:34  24 -> AppSpacing.lg
+  20:9  Text -> AppText
+  22:12  TextStyle(...) -> AppTypography.title
+  24:9  Text -> AppText
+  25:3  ElevatedButton -> AppButton
+
+Would fix 9 issues in 1 file. Run without --dry-run to apply.
+
+9 issues have no exact token; "dart analyze" lists them.

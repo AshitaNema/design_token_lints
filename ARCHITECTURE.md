@@ -35,7 +35,7 @@ analysis_options.yaml / design_token_lints.yaml
 | `lib/src/tokens/` | Static evaluation of token declarations, `TokenIndex`, `NearestTokenMatcher`, CIEDE2000, the Flutter `Colors` table. |
 | `lib/src/detectors/` | One pure detector per rule, plus the visitors that feed them. |
 | `lib/src/rules/` | `DesignTokenRule`, the single `AnalysisRule` implementation, and the diagnostic codes. |
-| `lib/src/fixes/` | `TokenFix`, the single quick-fix producer. |
+| `lib/src/fixes/` | `TokenFix`, the single quick-fix producer; `BulkFixer` and `IgnoreComments` for the `fix` command. |
 | `lib/src/report/` | Usage counting, `ProjectAnalyzer`, `CoverageReport`, renderers. |
 | `lib/src/cli/`, `bin/` | The command line tool. |
 
@@ -131,6 +131,15 @@ nearest ones, with ids `design_token_lints.fix.<rule>[.nearest][.<n>]`. Exact
 fixes outrank nearest ones. Imports go through `importLibraryElement`, which
 reuses an existing import and honors its prefix.
 
+`design_token_lints fix` (`BulkFixer`) applies the same suggestions outside the
+IDE. It walks the project with `ProjectAnalyzer.walkFiles`, keeps findings that
+have exactly one exact suggestion, drops findings silenced by `// ignore:`
+comments (`IgnoreComments`, which reads comment tokens with the analysis
+server's line rules), and skips a replacement that overlaps a larger one. Each
+file gets one `ChangeBuilder` edit, so imports are added once, and the edits
+are applied with `SourceEdit.applySequence`. Files are written only after the
+whole project has been analyzed without configuration errors.
+
 ## Coverage
 
 `ProjectAnalyzer` builds an `AnalysisContextCollection` over the target
@@ -167,5 +176,6 @@ supported.
 - Constructors other than `Colors` and the components are matched by name.
 - Tokens must be constant; `static final`, getters and `ThemeExtension` tokens
   are skipped.
-- Plugin fixes cannot be applied in bulk.
+- Plugin fixes cannot be applied in bulk by `dart fix`; the `fix` command
+  covers exact fixes.
 - The `Colors` table follows the Flutter version it was generated from.

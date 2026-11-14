@@ -124,6 +124,27 @@ void main() {
       },
     );
 
+    test('files are ordered by finding count, then by path', () async {
+      for (final name in ['b_one', 'a_one']) {
+        project.write('lib/screens/$name.dart', '''
+import 'package:flutter/material.dart';
+
+final x = EdgeInsets.all(16);
+''');
+      }
+      final result = await run(['coverage', '--format', 'json']);
+      final json = jsonDecode(result.out) as Map<String, Object?>;
+      final paths = [
+        for (final file in json['files']! as List<Object?>)
+          (file! as Map<String, Object?>)['path'],
+      ];
+      expect(paths, [
+        'lib/screens/legacy_checkout.dart',
+        'lib/screens/a_one.dart',
+        'lib/screens/b_one.dart',
+      ]);
+    });
+
     test('a clean project reports full coverage', () async {
       project.delete('lib/screens/legacy_checkout.dart');
       final result = await run(['coverage', '--fail-under', '100']);
