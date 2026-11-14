@@ -1,3 +1,11 @@
+## Unreleased
+
+- `avoid_raw_color`: a translucent color whose red, green and blue equal an
+  opaque token now offers a fix to `Token.withValues(alpha: …)`, for example
+  `Color(0x801E88E5)` to `AppColors.primary.withValues(alpha: 0.5)`. Not
+  offered in constant contexts or default values, where a method call is not
+  allowed.
+
 ## 0.1.2
 
 - README: a shorter introduction, a table of contents, a getting-started

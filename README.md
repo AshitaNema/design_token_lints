@@ -216,7 +216,15 @@ Container(color: AppColors.primary)
 token has the same value as another (an alias), both are offered. With
 `matching.color_delta_e` set, close colors also offer *Replace with nearest
 token AppColors.primary (ΔE 1.3)*, at lower priority, up to three candidates.
-A color with a different alpha is never a match.
+A color with a different alpha is never a nearest match.
+
+A translucent color whose red, green and blue equal an opaque token, such as
+`Color(0x801E88E5)`, offers *Replace with
+AppColors.primary.withValues(alpha: 0.5)*. The alpha is written with two
+decimals, or three when two would change the 8-bit value (`0x7F` becomes
+`0.498`), so the color stays the same. This fix is not offered where a method
+call is not allowed: in a constant context (`const` variables and collections)
+or in a parameter's default value.
 
 ### avoid_magic_spacing
 

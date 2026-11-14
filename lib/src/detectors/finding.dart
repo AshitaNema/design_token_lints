@@ -13,7 +13,8 @@ final class TokenSuggestion {
     required this.length,
     required this.replacement,
     this.importUri,
-  });
+    String? label,
+  }) : _label = label;
 
   /// The token that is suggested.
   final TokenEntry entry;
@@ -33,11 +34,15 @@ final class TokenSuggestion {
   /// The library that must be imported for [replacement] to resolve.
   final String? importUri;
 
+  final String? _label;
+
   /// Whether the match is exact.
   bool get isExact => distance == 0;
 
-  /// The source reference of the suggested token.
-  String get reference => entry.reference;
+  /// The suggestion as shown in messages: the token reference, or the whole
+  /// expression when the token is adjusted, as in
+  /// `AppColors.primary.withValues(alpha: 0.5)`.
+  String get reference => _label ?? entry.reference;
 }
 
 /// A place in the code that bypasses the design system.

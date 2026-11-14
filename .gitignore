@@ -13,3 +13,6 @@ example/pubspec.lock
 test/fixtures/**/pubspec.lock
 example/.flutter-plugins-dependencies
 doc/*.mov
+
+# Local notes, never committed or published
+notes/
