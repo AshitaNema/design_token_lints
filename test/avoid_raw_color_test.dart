@@ -1,5 +1,6 @@
 import 'package:analyzer/error/error.dart';
 import 'package:design_token_lints/src/config/rule_id.dart';
+import 'package:design_token_lints/src/detectors/color_detector.dart';
 import 'package:design_token_lints/src/rules/design_token_rule.dart';
 import 'package:test/test.dart';
 import 'package:test_reflective_loader/test_reflective_loader.dart';
@@ -10,6 +11,26 @@ void main() {
   defineReflectiveSuite(() {
     defineReflectiveTests(AvoidRawColorTest);
     defineReflectiveTests(AvoidRawColorFixTest);
+  });
+
+  group('alphaLiteral', () {
+    test('uses two decimals when they round-trip', () {
+      expect(alphaLiteral(0x80), '0.5');
+      expect(alphaLiteral(0x1A), '0.1');
+      expect(alphaLiteral(0x33), '0.2');
+      expect(alphaLiteral(0), '0');
+    });
+
+    test('falls back to three decimals', () {
+      expect(alphaLiteral(0x7F), '0.498');
+      expect(alphaLiteral(0xFE), '0.996');
+    });
+
+    test('every 8-bit alpha converts back to itself', () {
+      for (var alpha = 0; alpha < 0xFF; alpha++) {
+        expect((double.parse(alphaLiteral(alpha)) * 255).round(), alpha);
+      }
+    });
   });
 }
 
@@ -332,6 +353,22 @@ const a = Color(0xFF1E88E5);
     ]);
   }
 
+  Future<void> test_message_names_translucent_token() async {
+    const code =
+        '''
+$testImports
+final a = Color(0x801E88E5);
+''';
+    final offset = code.indexOf('Color(0x801E88E5)');
+    await assertDiagnostics(code, [
+      lint(
+        offset,
+        'Color(0x801E88E5)'.length,
+        correctionContains: 'AppColors.primary.withValues(alpha: 0.5).',
+      ),
+    ]);
+  }
+
   Future<void> test_message_without_match_names_the_class() async {
     const code =
         '''
@@ -502,5 +539,94 @@ const a = Color(0xFF1E88F0);
       '$_nearest.2',
       '$_nearest.3',
     ]);
+  }
+
+  Future<void> test_translucent_uses_token_with_alpha() async {
+    const code =
+        '''
+$testImports
+final a = Color(0x801E88E5);
+''';
+    final fixes = await fixesFor(code);
+    // `alias` has the same value as `primary`, so both are offered.
+    expect(fixes.map((f) => f.kind.id), [_exact, '$_exact.2']);
+    expect(
+      fixes.first.change.message,
+      'Replace with AppColors.primary.withValues(alpha: 0.5)',
+    );
+    expect(apply(fixes.first, code), '''
+$testImports
+final a = AppColors.primary.withValues(alpha: 0.5);
+''');
+  }
+
+  Future<void> test_translucent_three_decimals() async {
+    await assertFix(
+      '''
+$testImports
+final a = Color(0x7F1E88E5);
+''',
+      '''
+$testImports
+final a = AppColors.primary.withValues(alpha: 0.498);
+''',
+      kindId: _exact,
+    );
+  }
+
+  Future<void> test_translucent_replaces_explicit_const() async {
+    await assertFix(
+      '''
+$testImports
+final a = const Color(0x801E88E5);
+''',
+      '''
+$testImports
+final a = AppColors.primary.withValues(alpha: 0.5);
+''',
+      kindId: _exact,
+    );
+  }
+
+  Future<void> test_translucent_from_rgbo() async {
+    await assertFix(
+      '''
+$testImports
+final a = Color.fromRGBO(30, 136, 229, 0.5);
+''',
+      '''
+$testImports
+final a = AppColors.primary.withValues(alpha: 0.5);
+''',
+      kindId: _exact,
+    );
+  }
+
+  Future<void> test_translucent_no_fix_in_const_variable() async {
+    await assertNoFix('''
+$testImports
+const a = Color(0x801E88E5);
+''');
+  }
+
+  Future<void> test_translucent_no_fix_in_const_collection() async {
+    await assertNoFix('''
+$testImports
+final a = const [Color(0x801E88E5)];
+''');
+  }
+
+  Future<void> test_translucent_no_fix_in_default_value() async {
+    await assertNoFix('''
+$testImports
+void f({Color c = const Color(0x801E88E5)}) {}
+''');
+  }
+
+  Future<void> test_translucent_needs_equal_rgb() async {
+    await assertNoFix('''
+$testImports
+final a = Color(0x801E88E6);
+''');
   }
 }

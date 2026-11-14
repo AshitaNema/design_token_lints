@@ -95,7 +95,10 @@ disagree.
 
 - Number-valued rules (spacing, radius) report at the literal, so a surrounding
   constructor is kept, and match with `NearestTokenMatcher.matchNumber`.
-- Colors match on ARGB, then on CIEDE2000 in CIE L*a*b* with equal alpha. The
+- Colors match on ARGB, then on CIEDE2000 in CIE L*a*b* with equal alpha. A
+  translucent color with the RGB of an opaque token also gets an exact
+  suggestion of `Token.withValues(alpha: …)`, unless the node is in a constant
+  context or a default value. The
   implementation is tested against the reference data in Sharma, Wu and Dalal,
   *The CIEDE2000 Color-Difference Formula* (2005).
 - Typography and shadows match structurally and only exactly.

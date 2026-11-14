@@ -90,12 +90,16 @@ final class ColorDetector extends Detector {
       (entry) => (entry.value as ColorValue).argb,
       maxDeltaE: config.colorDeltaE,
     );
+    final translucent = matches.any((match) => match.distance == 0)
+        ? const <TokenSuggestion>[]
+        : _translucentSuggestions(node, argb, entries);
     return Finding(
       rule: rule,
       node: node,
       raw: node.toSource(),
       fallbackTokenClass: config.tokens[DesignCategory.color]?.className,
       suggestions: [
+        ...translucent,
         for (final match in matches)
           TokenSuggestion(
             entry: match.item,
@@ -108,4 +112,57 @@ final class ColorDetector extends Detector {
       ],
     );
   }
+
+  /// Suggests `Token.withValues(alpha: …)` for a translucent color whose red,
+  /// green and blue channels equal an opaque token.
+  ///
+  /// The result is identical at 8 bits per channel. No suggestion is made
+  /// where a method call is not allowed: in a constant context or in a
+  /// parameter's default value.
+  List<TokenSuggestion> _translucentSuggestions(
+    AstNode node,
+    int argb,
+    List<TokenEntry> entries,
+  ) {
+    final alpha = (argb >> 24) & 0xFF;
+    if (alpha == 0xFF) return const [];
+    if (node is! Expression || node.inConstantContext) return const [];
+    if (node.thisOrAncestorOfType<FormalParameterDefaultClause>() != null) {
+      return const [];
+    }
+    final rgb = argb & 0xFFFFFF;
+    final text = alphaLiteral(alpha);
+    return [
+      for (final entry in entries)
+        if (entry.value case ColorValue(
+          argb: final tokenArgb,
+        ) when (tokenArgb >> 24) & 0xFF == 0xFF && tokenArgb & 0xFFFFFF == rgb)
+          TokenSuggestion(
+            entry: entry,
+            distance: 0,
+            offset: node.offset,
+            length: node.length,
+            replacement: '${entry.reference}.withValues(alpha: $text)',
+            importUri: entry.importUri,
+            label: '${entry.reference}.withValues(alpha: $text)',
+          ),
+    ];
+  }
+}
+
+/// The shortest decimal literal for the 8-bit [alpha] that converts back to
+/// the same value, the way Flutter does (`(a * 255).round()`).
+///
+/// Two decimals are used when they round-trip, otherwise three, which always
+/// do: `0x80` is `0.5`, `0x7F` is `0.498`.
+String alphaLiteral(int alpha) {
+  for (final digits in const [2, 3]) {
+    final text = (alpha / 255).toStringAsFixed(digits);
+    if ((double.parse(text) * 255).round() == alpha) {
+      return text
+          .replaceFirst(RegExp(r'0+$'), '')
+          .replaceFirst(RegExp(r'\.$'), '');
+    }
+  }
+  throw StateError('unreachable: three decimals always round-trip');
 }
