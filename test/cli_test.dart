@@ -190,6 +190,68 @@ final c = Card(elevation: 5);
       expect(after.out, contains('icon sizes 100%, elevation 50%'));
     });
 
+    group('theme members count as uses', () {
+      Future<Map<String, int>> usages() async {
+        final result = await run(['coverage', '--format', 'json']);
+        final json = jsonDecode(result.out) as Map<String, Object?>;
+        final categories = json['categories']! as Map<String, Object?>;
+        int of(String key) =>
+            (categories[key]! as Map<String, Object?>)['usages']! as int;
+        return {'color': of('color'), 'typography': of('typography')};
+      }
+
+      const themed = '''
+Color a(BuildContext context) => Theme.of(context).colorScheme.primary;
+Color b(BuildContext context) => ColorScheme.of(context).primaryContainer;
+TextStyle? c(BuildContext context) => Theme.of(context).textTheme.bodyMedium;
+TextStyle? d(BuildContext context) {
+  final theme = TextTheme.of(context);
+  return theme.titleLarge;
+}
+double e(BuildContext context) => Theme.of(context).colorScheme.contrastLevel;
+ColorScheme f(BuildContext context) => Theme.of(context).colorScheme;
+ColorScheme g(BuildContext context) =>
+    Theme.of(context).colorScheme.copyWith(primary: null);
+''';
+
+      test('from flutter/material', () async {
+        final before = await usages();
+        project.write('lib/screens/themed.dart', '''
+import 'package:flutter/material.dart';
+
+$themed''');
+        final after = await usages();
+        expect(after['color'], before['color']! + 2);
+        expect(after['typography'], before['typography']! + 2);
+      });
+
+      test('from material_ui', () async {
+        final before = await usages();
+        project.write('lib/screens/themed.dart', '''
+import 'package:material_ui/material_ui.dart';
+
+$themed''');
+        final after = await usages();
+        expect(after['color'], before['color']! + 2);
+        expect(after['typography'], before['typography']! + 2);
+      });
+
+      test('not from a class of your own with the same name', () async {
+        final before = await usages();
+        project.write('lib/screens/themed.dart', '''
+import 'package:flutter/material.dart' hide ColorScheme;
+
+class ColorScheme {
+  const ColorScheme(this.primary);
+  final Color primary;
+}
+
+Color a(ColorScheme scheme) => scheme.primary;
+''');
+        expect(await usages(), before);
+      });
+    });
+
     test('a clean project reports full coverage', () async {
       project.delete('lib/screens/legacy_checkout.dart');
       final result = await run(['coverage', '--fail-under', '100']);

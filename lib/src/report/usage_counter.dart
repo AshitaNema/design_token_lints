@@ -1,12 +1,19 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import '../config/config_loader.dart';
 import '../config/rule_id.dart';
+import '../detectors/element_checks.dart';
 
 /// Counts references to design-system tokens and components in a resolved
 /// syntax tree.
+///
+/// Colors read from Flutter's `ColorScheme` and text styles read from its
+/// `TextTheme` (`Theme.of(context).colorScheme.primary`,
+/// `TextTheme.of(context).bodyMedium`) count as color and typography uses:
+/// they come from the app's theme rather than being written by hand.
 final class UsageCounter extends RecursiveAstVisitor<void> {
   /// Creates a counter for [project] that counts only [categories].
   UsageCounter(this.project, this.categories) {
@@ -31,6 +38,13 @@ final class UsageCounter extends RecursiveAstVisitor<void> {
   /// The number of usages per category.
   final Map<DesignCategory, int> counts = {};
 
+  /// Theme classes whose members count as uses, with the category and the
+  /// type a member must have to count.
+  static const _themeClasses = {
+    'ColorScheme': (DesignCategory.color, 'Color'),
+    'TextTheme': (DesignCategory.typography, 'TextStyle'),
+  };
+
   final Map<String, DesignCategory> _classCategories = {};
   final Set<String> _componentClasses = {};
 
@@ -40,8 +54,28 @@ final class UsageCounter extends RecursiveAstVisitor<void> {
     }
   }
 
+  /// Counts [access] when it reads a color or text style from a theme object
+  /// [target].
+  void _countThemeMember(Expression? target, Expression access) {
+    final type = target?.staticType;
+    if (type is! InterfaceType) return;
+    final theme = _themeClasses[type.element.name];
+    if (theme == null || !isDeclaredInFlutter(type.element)) return;
+    final value = access.staticType;
+    if (value is InterfaceType && value.element.name == theme.$2) {
+      _count(theme.$1);
+    }
+  }
+
+  @override
+  void visitPropertyAccess(PropertyAccess node) {
+    _countThemeMember(node.realTarget, node);
+    super.visitPropertyAccess(node);
+  }
+
   @override
   void visitPrefixedIdentifier(PrefixedIdentifier node) {
+    _countThemeMember(node.prefix, node);
     final prefix = node.prefix.element;
     if (prefix is InterfaceElement) {
       final category = _classCategories[prefix.name];

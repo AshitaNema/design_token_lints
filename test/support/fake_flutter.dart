@@ -215,6 +215,42 @@ class Container extends Widget {
 class DefaultTextStyle extends Widget {
   const DefaultTextStyle({required TextStyle style, required Widget child});
 }
+class BuildContext {}
+
+class ColorScheme {
+  const ColorScheme({
+    required this.primary,
+    Color? primaryContainer,
+    this.contrastLevel = 0,
+  }) : _primaryContainer = primaryContainer;
+  final Color primary;
+  final Color? _primaryContainer;
+  Color get primaryContainer => _primaryContainer ?? primary;
+  final double contrastLevel;
+  ColorScheme copyWith({Color? primary}) => this;
+  static ColorScheme of(BuildContext context) =>
+      const ColorScheme(primary: Color(0xFF000000));
+}
+
+class TextTheme {
+  const TextTheme({this.bodyMedium, this.titleLarge});
+  final TextStyle? bodyMedium;
+  final TextStyle? titleLarge;
+  static TextTheme of(BuildContext context) => const TextTheme();
+}
+
+class ThemeData {
+  const ThemeData({required this.colorScheme, required this.textTheme});
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
+}
+
+class Theme {
+  static ThemeData of(BuildContext context) => const ThemeData(
+    colorScheme: ColorScheme(primary: Color(0xFF000000)),
+    textTheme: TextTheme(),
+  );
+}
 ''';
 
 /// A minimal stand-in for `package:material_ui/material_ui.dart`.
@@ -222,8 +258,10 @@ class DefaultTextStyle extends Widget {
 /// Like the real package, it declares its own `Colors` and `ElevatedButton`
 /// instead of re-exporting Flutter's.
 const fakeMaterialUi = r'''
-import 'package:flutter/material.dart' show Color, MaterialColor, Widget;
-export 'package:flutter/material.dart' hide Colors, ElevatedButton;
+import 'package:flutter/material.dart'
+    show BuildContext, Color, MaterialColor, TextStyle, Widget;
+export 'package:flutter/material.dart'
+    hide Colors, ColorScheme, ElevatedButton, TextTheme, Theme, ThemeData;
 
 abstract final class Colors {
   static const Color transparent = Color(0x00000000);
@@ -234,6 +272,43 @@ abstract final class Colors {
 
 class ElevatedButton extends Widget {
   const ElevatedButton({required void Function()? onPressed, Widget? child});
+}
+
+class BuildContext {}
+
+class ColorScheme {
+  const ColorScheme({
+    required this.primary,
+    Color? primaryContainer,
+    this.contrastLevel = 0,
+  }) : _primaryContainer = primaryContainer;
+  final Color primary;
+  final Color? _primaryContainer;
+  Color get primaryContainer => _primaryContainer ?? primary;
+  final double contrastLevel;
+  ColorScheme copyWith({Color? primary}) => this;
+  static ColorScheme of(BuildContext context) =>
+      const ColorScheme(primary: Color(0xFF000000));
+}
+
+class TextTheme {
+  const TextTheme({this.bodyMedium, this.titleLarge});
+  final TextStyle? bodyMedium;
+  final TextStyle? titleLarge;
+  static TextTheme of(BuildContext context) => const TextTheme();
+}
+
+class ThemeData {
+  const ThemeData({required this.colorScheme, required this.textTheme});
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
+}
+
+class Theme {
+  static ThemeData of(BuildContext context) => const ThemeData(
+    colorScheme: ColorScheme(primary: Color(0xFF000000)),
+    textTheme: TextTheme(),
+  );
 }
 ''';
 

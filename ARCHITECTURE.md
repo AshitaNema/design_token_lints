@@ -166,8 +166,12 @@ entries for files outside it.
 directory, so analyzer excludes apply. For each file it looks up the
 configuration, skips exempt files, resolves the unit and walks it once with the
 active detectors (`DetectorWalker`) and once with `UsageCounter`. A usage is a
-reference to a member of a configured token class, or the construction of a
-configured replacement widget. Category coverage is
+reference to a member of a configured token class, the construction of a
+configured replacement widget, or a read of a `Color` from Flutter's
+`ColorScheme` or a `TextStyle` from its `TextTheme`. Theme members are
+recognized by the static type of the receiver, so getters, `.of(context)`,
+chains and local variables all count, and a class of the same name declared
+elsewhere does not. Category coverage is
 `usages / (usages + findings)`; the overall figure is the same ratio over all
 counts. Renderers (`console`, `json`, `markdown`) are pure functions of the
 `CoverageReport`.

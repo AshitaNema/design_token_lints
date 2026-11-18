@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Coverage counts colors read from Flutter's `ColorScheme` and text styles
+  read from its `TextTheme` (`Theme.of(context).colorScheme.primary`,
+  `TextTheme.of(context).bodyMedium`) as color and typography uses. Apps
+  that use Material theming will see higher coverage than with 0.2.x.
 - New rules `avoid_raw_icon_size` and `avoid_raw_elevation`, with the
   `icon_size` and `elevation` token categories, `allow.icon_size`,
   `allow.elevation`, `matching.icon_size_tolerance` and
