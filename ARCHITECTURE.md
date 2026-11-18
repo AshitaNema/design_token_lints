@@ -104,7 +104,10 @@ disagree.
 - Typography and shadows match structurally and only exactly.
 - Constructors are recognized by name, so most rules need only the parsed tree.
   `Colors.*` and the classes under `components:` are checked through the
-  resolved element, because identity matters there.
+  resolved element, because identity matters there. An element counts as
+  Flutter's when its library is in `flutter`, `material_ui` or `cupertino_ui`:
+  since Flutter 3.47 those packages declare their own copies of the Material
+  and Cupertino classes.
 - Nodes inside a configured token class are ignored.
 
 ## Rules and the analysis server

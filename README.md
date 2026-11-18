@@ -42,7 +42,7 @@ Watch: [quick fixes in VS Code](https://github.com/AshitaNema/design_token_lints
 
    ```yaml
    plugins:
-     design_token_lints: ^0.2.0
+     design_token_lints: ^0.2.1
    ```
 
 2. Describe your design system. Add this to the same file, or to a
@@ -104,7 +104,7 @@ and a `diagnostics` section:
 ```yaml
 plugins:
   design_token_lints:
-    version: ^0.2.0
+    version: ^0.2.1
     diagnostics:
       avoid_raw_shadow: false
       avoid_magic_spacing: error
@@ -206,7 +206,8 @@ skipped. `design_token_lints check-config` lists them.
 
 Flags `Color(0xFF…)`, `Color.fromARGB`, `Color.fromRGBO`, `Color.from`, and
 `Colors.<name>`, including `Colors.red.shade100` and `Colors.red[100]`, unless
-allow-listed. `Colors` must be Flutter's class; your own `Colors` is ignored.
+allow-listed. `Colors` must be Flutter's class, from `package:flutter` or
+`package:material_ui`; your own `Colors` is ignored.
 Allowed: `AppColors.primary`, `Theme.of(context).colorScheme.primary`.
 
 ```dart
@@ -306,8 +307,9 @@ colors, blur, spread and offset).
 
 ### prefer_design_system_component
 
-Flags construction of a Flutter widget listed under `components:`. The widget is
-matched through its resolved element, so your own `Text` class is never
+Flags construction of a Flutter widget listed under `components:`, from
+`package:flutter`, `package:material_ui` or `package:cupertino_ui`. The widget
+is matched through its resolved element, so your own `Text` class is never
 reported.
 
 ```dart

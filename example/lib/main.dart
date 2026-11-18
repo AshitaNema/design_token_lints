@@ -1,6 +1,6 @@
 import 'package:acme_shop/screens/checkout.dart';
 import 'package:acme_shop/screens/legacy_checkout.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() => runApp(const AcmeShop());
 

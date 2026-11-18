@@ -1,3 +1,12 @@
+## 0.2.1
+
+- Support apps that use the `material_ui` and `cupertino_ui` packages (Flutter
+  3.47 and later, where `package:flutter/material.dart` is deprecated). Those
+  packages declare their own `Colors` and widgets, which `avoid_raw_color` and
+  `prefer_design_system_component` did not recognize, so `Colors.*` and
+  configured components went unreported.
+- The example app uses `material_ui`.
+
 ## 0.2.0
 
 Adoption: easier to switch on in an existing app.

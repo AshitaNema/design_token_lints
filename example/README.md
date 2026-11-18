@@ -13,6 +13,8 @@ A small Flutter app that enforces its own design system with
 
 ## Try it
 
+Requires Flutter 3.47 or later: the app uses the `material_ui` package.
+
 ```sh
 cd example
 flutter pub get

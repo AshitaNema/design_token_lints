@@ -336,6 +336,30 @@ const a = Color(0xFF123456);
 ''');
   }
 
+  Future<void> test_material_ui_palette_is_flagged() async {
+    await assertFlagged(
+      '''
+import 'package:material_ui/material_ui.dart';
+final a = Colors.red;
+final b = Colors.blue.shade100;
+final c = Colors.white;
+''',
+      ['Colors.red', 'Colors.blue.shade100', 'Colors.white'],
+    );
+  }
+
+  Future<void> test_material_ui_allow_list_by_name() async {
+    writeConfig('''
+$defaultConfig
+allow:
+  color: [Colors.transparent]
+''');
+    await assertNoDiagnostics('''
+import 'package:material_ui/material_ui.dart';
+final a = Colors.transparent;
+''');
+  }
+
   Future<void> test_message_names_suggested_token() async {
     const code =
         '''
@@ -431,6 +455,22 @@ const a = Colors.white;
       '''
 $testImports
 const a = AppColors.onPrimary;
+''',
+      kindId: _exact,
+    );
+  }
+
+  Future<void> test_exact_from_material_ui_palette() async {
+    await assertFix(
+      '''
+import 'package:material_ui/material_ui.dart';
+import 'package:test/design_system/app_colors.dart';
+final a = Colors.white;
+''',
+      '''
+import 'package:material_ui/material_ui.dart';
+import 'package:test/design_system/app_colors.dart';
+final a = AppColors.onPrimary;
 ''',
       kindId: _exact,
     );

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The checkout screen as it was before the design system existed: every
 /// value is hard-coded. Open it in an IDE with the plugin enabled to see the
