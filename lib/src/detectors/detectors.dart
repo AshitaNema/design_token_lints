@@ -3,6 +3,7 @@ import '../config/rule_id.dart';
 import 'color_detector.dart';
 import 'component_detector.dart';
 import 'detector.dart';
+import 'numeric_argument_detector.dart';
 import 'radius_detector.dart';
 import 'shadow_detector.dart';
 import 'spacing_detector.dart';
@@ -19,6 +20,8 @@ final class Detectors {
     RuleId.avoidRawRadius => RadiusDetector(project),
     RuleId.avoidInlineTextStyle => TypographyDetector(project),
     RuleId.avoidRawShadow => ShadowDetector(project),
+    RuleId.avoidRawIconSize => NumericArgumentDetector.iconSize(project),
+    RuleId.avoidRawElevation => NumericArgumentDetector.elevation(project),
     RuleId.preferDesignSystemComponent => ComponentDetector(project),
   };
 

@@ -59,6 +59,8 @@ final class TokenFix extends ResolvedCorrectionProducer {
     final withRaw =
         rule == RuleId.avoidMagicSpacing ||
         rule == RuleId.avoidRawRadius ||
+        rule == RuleId.avoidRawIconSize ||
+        rule == RuleId.avoidRawElevation ||
         rule == RuleId.preferDesignSystemComponent;
     if (nearest) {
       return withRaw

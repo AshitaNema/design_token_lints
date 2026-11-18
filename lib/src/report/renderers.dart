@@ -44,6 +44,8 @@ String _label(DesignCategory category) => switch (category) {
   DesignCategory.radius => 'radius',
   DesignCategory.typography => 'typography',
   DesignCategory.shadow => 'shadows',
+  DesignCategory.iconSize => 'icon sizes',
+  DesignCategory.elevation => 'elevation',
   DesignCategory.component => 'components',
 };
 
@@ -57,6 +59,8 @@ String _rawNoun(RuleId rule, int count) {
     RuleId.avoidInlineTextStyle =>
       one ? 'inline text style' : 'inline text styles',
     RuleId.avoidRawShadow => one ? 'raw shadow' : 'raw shadows',
+    RuleId.avoidRawIconSize => one ? 'raw icon size' : 'raw icon sizes',
+    RuleId.avoidRawElevation => one ? 'raw elevation' : 'raw elevations',
     RuleId.preferDesignSystemComponent =>
       one ? 'off-system widget' : 'off-system widgets',
   };

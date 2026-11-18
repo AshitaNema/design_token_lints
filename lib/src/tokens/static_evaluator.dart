@@ -61,7 +61,9 @@ final class StaticEvaluator {
       case DesignCategory.color:
         final argb = colorArgb(expression);
         return argb == null ? null : ColorValue(argb);
-      case DesignCategory.spacing:
+      case DesignCategory.spacing ||
+          DesignCategory.iconSize ||
+          DesignCategory.elevation:
         final value = number(expression);
         return value == null ? null : NumberValue(value.toDouble());
       case DesignCategory.radius:

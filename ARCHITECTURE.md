@@ -93,8 +93,10 @@ range, replacement text, import). Suggestions are computed once, by the
 detector, so the rule message, the quick fix and the coverage report cannot
 disagree.
 
-- Number-valued rules (spacing, radius) report at the literal, so a surrounding
-  constructor is kept, and match with `NearestTokenMatcher.matchNumber`.
+- Number-valued rules (spacing, radius, icon size, elevation) report at the
+  literal, so a surrounding constructor is kept, and match with
+  `NearestTokenMatcher.matchNumber`. Icon size and elevation share
+  `NumericArgumentDetector`, a table of constructors and argument names.
 - Colors match on ARGB, then on CIEDE2000 in CIE L*a*b* with equal alpha. A
   translucent color with the RGB of an opaque token also gets an exact
   suggestion of `Token.withValues(alpha: …)`, unless the node is in a constant

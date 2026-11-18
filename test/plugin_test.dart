@@ -64,6 +64,8 @@ void main() {
         RuleId.avoidRawRadius,
         RuleId.avoidInlineTextStyle,
         RuleId.avoidRawShadow,
+        RuleId.avoidRawIconSize,
+        RuleId.avoidRawElevation,
       });
     });
   });
@@ -114,6 +116,8 @@ void main() {
         RuleId.avoidRawColor,
         RuleId.avoidMagicSpacing,
         RuleId.avoidRawRadius,
+        RuleId.avoidRawIconSize,
+        RuleId.avoidRawElevation,
       ]);
     });
 
