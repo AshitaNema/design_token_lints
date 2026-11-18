@@ -5,7 +5,7 @@ import 'package:acme_shop/design_system/app_shadows.dart';
 import 'package:acme_shop/design_system/app_spacing.dart';
 import 'package:acme_shop/design_system/app_text.dart';
 import 'package:acme_shop/design_system/app_typography.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The checkout screen, written against the design system.
 class Checkout extends StatelessWidget {

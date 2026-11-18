@@ -155,6 +155,10 @@ abstract class DtlRuleTest extends AnalysisRuleTest {
   void setUp() {
     rule = DesignTokenRule(ruleId);
     newPackage('flutter').addFile('lib/material.dart', fakeFlutterMaterial);
+    newPackage('material_ui').addFile('lib/material_ui.dart', fakeMaterialUi);
+    newPackage(
+      'cupertino_ui',
+    ).addFile('lib/cupertino_ui.dart', fakeCupertinoUi);
     newPackage('acme_ui').addFile('lib/acme_ui.dart', acmeUiLibrary);
     super.setUp();
     for (final entry in _tokenFiles.entries) {

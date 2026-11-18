@@ -102,6 +102,31 @@ final a = m.Text('x');
     );
   }
 
+  Future<void> test_material_ui_widget_is_flagged() async {
+    await assertFlagged(
+      '''
+import 'package:material_ui/material_ui.dart';
+final a = ElevatedButton(onPressed: null);
+final b = Text('x');
+''',
+      ['ElevatedButton', 'Text'],
+    );
+  }
+
+  Future<void> test_cupertino_ui_widget_is_flagged() async {
+    writeConfig('''
+$defaultConfig
+  CupertinoButton: { replacement: AppButton, import: 'package:acme_ui/acme_ui.dart' }
+''');
+    await assertFlagged(
+      '''
+import 'package:cupertino_ui/cupertino_ui.dart';
+final a = CupertinoButton(onPressed: null);
+''',
+      ['CupertinoButton'],
+    );
+  }
+
   Future<void> test_design_system_path_is_exempt() async {
     final path = '$testPackageRootPath/lib/design_system/app_button.dart';
     newFile(path, '''
@@ -171,6 +196,21 @@ final a = ElevatedButton(onPressed: null, child: SizedBox());
       '''
 import 'package:acme_ui/acme_ui.dart';
 import 'package:flutter/material.dart';
+final a = AppButton(onPressed: null, child: SizedBox());
+''',
+      kindId: _exact,
+    );
+  }
+
+  Future<void> test_replaces_a_material_ui_widget() async {
+    await assertFix(
+      '''
+import 'package:material_ui/material_ui.dart';
+final a = ElevatedButton(onPressed: null, child: SizedBox());
+''',
+      '''
+import 'package:acme_ui/acme_ui.dart';
+import 'package:material_ui/material_ui.dart';
 final a = AppButton(onPressed: null, child: SizedBox());
 ''',
       kindId: _exact,

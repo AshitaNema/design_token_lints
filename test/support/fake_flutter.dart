@@ -151,3 +151,32 @@ class DefaultTextStyle extends Widget {
   const DefaultTextStyle({required TextStyle style, required Widget child});
 }
 ''';
+
+/// A minimal stand-in for `package:material_ui/material_ui.dart`.
+///
+/// Like the real package, it declares its own `Colors` and `ElevatedButton`
+/// instead of re-exporting Flutter's.
+const fakeMaterialUi = r'''
+import 'package:flutter/material.dart' show Color, MaterialColor, Widget;
+export 'package:flutter/material.dart' hide Colors, ElevatedButton;
+
+abstract final class Colors {
+  static const Color transparent = Color(0x00000000);
+  static const Color white = Color(0xFFFFFFFF);
+  static const MaterialColor red = MaterialColor(0xFFF44336, <int, Color>{});
+  static const MaterialColor blue = MaterialColor(0xFF2196F3, <int, Color>{});
+}
+
+class ElevatedButton extends Widget {
+  const ElevatedButton({required void Function()? onPressed, Widget? child});
+}
+''';
+
+/// A minimal stand-in for `package:cupertino_ui/cupertino_ui.dart`.
+const fakeCupertinoUi = r'''
+import 'package:flutter/material.dart' show Widget;
+
+class CupertinoButton extends Widget {
+  const CupertinoButton({required void Function()? onPressed, Widget? child});
+}
+''';
