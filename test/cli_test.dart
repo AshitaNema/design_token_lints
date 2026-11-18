@@ -145,6 +145,51 @@ final x = EdgeInsets.all(16);
       ]);
     });
 
+    test('icon size and elevation are measured and fixed', () async {
+      project.write('lib/design_system/app_icon_size.dart', '''
+abstract final class AppIconSize {
+  static const double md = 24;
+}
+''');
+      project.write('lib/design_system/app_elevation.dart', '''
+abstract final class AppElevation {
+  static const double card = 2;
+}
+''');
+      project.write('design_token_lints.yaml', '''
+tokens:
+  icon_size: { class: AppIconSize, file: lib/design_system/app_icon_size.dart }
+  elevation: { class: AppElevation, file: lib/design_system/app_elevation.dart }
+''');
+      project.write('lib/screens/legacy_checkout.dart', '''
+import 'package:flutter/material.dart';
+
+final a = Icon(null, size: 24);
+final b = Card(elevation: 2);
+final c = Card(elevation: 5);
+''');
+      final coverage = await run([
+        'coverage',
+        '--category',
+        'icon_size,elevation',
+      ]);
+      expect(coverage.code, ExitCodes.ok);
+      expect(
+        coverage.out,
+        startsWith('Design system coverage: 0% (icon sizes 0%, elevation 0%)'),
+      );
+      final fix = await run(['fix']);
+      expect(fix.out, contains('Fixed 2 issues in 1 file.'));
+      expect(
+        File(
+          p.join(project.root, 'lib', 'screens', 'legacy_checkout.dart'),
+        ).readAsStringSync(),
+        contains('Icon(null, size: AppIconSize.md)'),
+      );
+      final after = await run(['coverage']);
+      expect(after.out, contains('icon sizes 100%, elevation 50%'));
+    });
+
     test('a clean project reports full coverage', () async {
       project.delete('lib/screens/legacy_checkout.dart');
       final result = await run(['coverage', '--fail-under', '100']);

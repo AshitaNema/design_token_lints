@@ -77,8 +77,12 @@ class DtlConfig {
     this.allowColorNames = const {},
     this.allowSpacing = const {},
     this.allowRadius = const {},
+    this.allowIconSize = const {},
+    this.allowElevation = const {},
     this.spacingTolerance = 0,
     this.radiusTolerance = 0,
+    this.iconSizeTolerance = 0,
+    this.elevationTolerance = 0,
     this.colorDeltaE = 0,
     this.components = const {},
     this.exclude = const [],
@@ -138,11 +142,19 @@ class DtlConfig {
     }, 'design_system');
     final tokens = _readTokens(reader, yaml['tokens']);
     final allow = reader.map(yaml['allow'], 'allow');
-    reader.unknownKeys(allow, const {'color', 'spacing', 'radius'}, 'allow');
+    reader.unknownKeys(allow, const {
+      'color',
+      'spacing',
+      'radius',
+      'icon_size',
+      'elevation',
+    }, 'allow');
     final matching = reader.map(yaml['matching'], 'matching');
     reader.unknownKeys(matching, const {
       'spacing_tolerance',
       'radius_tolerance',
+      'icon_size_tolerance',
+      'elevation_tolerance',
       'color_delta_e',
     }, 'matching');
 
@@ -180,6 +192,8 @@ class DtlConfig {
       allowColorNames: colorNames,
       allowSpacing: reader.numbers(allow['spacing'], 'allow.spacing'),
       allowRadius: reader.numbers(allow['radius'], 'allow.radius'),
+      allowIconSize: reader.numbers(allow['icon_size'], 'allow.icon_size'),
+      allowElevation: reader.numbers(allow['elevation'], 'allow.elevation'),
       spacingTolerance: reader.number(
         matching['spacing_tolerance'],
         'matching.spacing_tolerance',
@@ -187,6 +201,14 @@ class DtlConfig {
       radiusTolerance: reader.number(
         matching['radius_tolerance'],
         'matching.radius_tolerance',
+      ),
+      iconSizeTolerance: reader.number(
+        matching['icon_size_tolerance'],
+        'matching.icon_size_tolerance',
+      ),
+      elevationTolerance: reader.number(
+        matching['elevation_tolerance'],
+        'matching.elevation_tolerance',
       ),
       colorDeltaE: reader.number(
         matching['color_delta_e'],
@@ -229,11 +251,23 @@ class DtlConfig {
   /// Radius literals that are always allowed.
   final Set<double> allowRadius;
 
+  /// Icon size literals that are always allowed.
+  final Set<double> allowIconSize;
+
+  /// Elevation literals that are always allowed.
+  final Set<double> allowElevation;
+
   /// Largest spacing difference, in logical pixels, offered as "nearest".
   final double spacingTolerance;
 
   /// Largest radius difference, in logical pixels, offered as "nearest".
   final double radiusTolerance;
+
+  /// Largest icon size difference, in logical pixels, offered as "nearest".
+  final double iconSizeTolerance;
+
+  /// Largest elevation difference offered as "nearest".
+  final double elevationTolerance;
 
   /// Largest CIEDE2000 distance offered as "nearest"; `0` disables it.
   final double colorDeltaE;

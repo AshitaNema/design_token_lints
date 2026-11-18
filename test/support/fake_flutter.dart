@@ -132,6 +132,71 @@ class ElevatedButton extends Widget {
     required Widget icon,
     required Widget label,
   });
+
+  static ButtonStyle styleFrom({double? elevation, Color? backgroundColor}) =>
+      const ButtonStyle();
+}
+
+class ButtonStyle {
+  const ButtonStyle();
+}
+
+class Icon extends Widget {
+  const Icon(Object? icon, {double? size, Color? color});
+}
+
+class ImageIcon extends Widget {
+  const ImageIcon(Object? image, {double? size});
+}
+
+class IconButton extends Widget {
+  const IconButton({
+    required void Function()? onPressed,
+    required Widget icon,
+    double? iconSize,
+  });
+  const IconButton.filled({
+    required void Function()? onPressed,
+    required Widget icon,
+    double? iconSize,
+  });
+}
+
+class IconThemeData {
+  const IconThemeData({double? size, Color? color});
+}
+
+class Material extends Widget {
+  const Material({double elevation = 0.0, Widget? child});
+}
+
+class Card extends Widget {
+  const Card({double? elevation, Widget? child});
+  const Card.outlined({double? elevation, Widget? child});
+}
+
+class AppBar extends Widget {
+  AppBar({double? elevation, double? scrolledUnderElevation});
+}
+
+class FloatingActionButton extends Widget {
+  const FloatingActionButton({
+    required void Function()? onPressed,
+    double? elevation,
+  });
+  const FloatingActionButton.extended({
+    required void Function()? onPressed,
+    required Widget label,
+    double? elevation,
+  });
+}
+
+class PhysicalModel extends Widget {
+  const PhysicalModel({
+    double elevation = 0.0,
+    required Color color,
+    Widget? child,
+  });
 }
 
 class Padding extends Widget {

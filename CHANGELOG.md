@@ -1,3 +1,11 @@
+## Unreleased
+
+- New rules `avoid_raw_icon_size` and `avoid_raw_elevation`, with the
+  `icon_size` and `elevation` token categories, `allow.icon_size`,
+  `allow.elevation`, `matching.icon_size_tolerance` and
+  `matching.elevation_tolerance`. Like every rule, they report nothing until
+  their tokens are configured. `fix`, `baseline` and `coverage` support them.
+
 ## 0.2.1
 
 - Support apps that use the `material_ui` and `cupertino_ui` packages (Flutter

@@ -52,6 +52,22 @@ abstract final class DtlCodes {
     correctionMessage: 'Try using {1}.',
   );
 
+  /// `avoid_raw_icon_size`.
+  static const avoidRawIconSize = LintCode(
+    'avoid_raw_icon_size',
+    "Raw icon size '{0}'.",
+    correctionMessage: 'Try using {1}.',
+    severity: DiagnosticSeverity.WARNING,
+  );
+
+  /// `avoid_raw_elevation`.
+  static const avoidRawElevation = LintCode(
+    'avoid_raw_elevation',
+    "Raw elevation '{0}'.",
+    correctionMessage: 'Try using {1}.',
+    severity: DiagnosticSeverity.WARNING,
+  );
+
   /// `prefer_design_system_component`.
   static const preferDesignSystemComponent = LintCode(
     'prefer_design_system_component',
@@ -67,6 +83,8 @@ abstract final class DtlCodes {
     RuleId.avoidRawRadius => avoidRawRadius,
     RuleId.avoidInlineTextStyle => avoidInlineTextStyle,
     RuleId.avoidRawShadow => avoidRawShadow,
+    RuleId.avoidRawIconSize => avoidRawIconSize,
+    RuleId.avoidRawElevation => avoidRawElevation,
     RuleId.preferDesignSystemComponent => preferDesignSystemComponent,
   };
 }
@@ -92,6 +110,12 @@ final class DesignTokenRule extends AnalysisRule {
         'the design system.',
     RuleId.avoidRawShadow:
         'Flags hand-written shadows so that shadows come from the design '
+        'system.',
+    RuleId.avoidRawIconSize:
+        'Flags numeric icon sizes so that icon sizes come from the design '
+        'system.',
+    RuleId.avoidRawElevation:
+        'Flags numeric elevations so that elevations come from the design '
         'system.',
     RuleId.preferDesignSystemComponent:
         'Flags raw widgets that the design system replaces with its own.',

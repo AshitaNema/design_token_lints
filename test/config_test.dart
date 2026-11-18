@@ -120,10 +120,35 @@ tokens:
       expect(config.tokens.keys, {DesignCategory.spacing});
     });
 
+    test('reads icon size and elevation', () {
+      final config = parse('''
+tokens:
+  icon_size: { class: AppIconSize, file: lib/icons.dart }
+  elevation: { class: AppElevation, file: lib/elevation.dart }
+allow:
+  icon_size: [18]
+  elevation: [1, 0.5]
+matching:
+  icon_size_tolerance: 2
+  elevation_tolerance: 1
+''');
+      expect(config.issues, isEmpty);
+      expect(config.tokens.keys, {
+        DesignCategory.iconSize,
+        DesignCategory.elevation,
+      });
+      expect(config.allowIconSize, {18});
+      expect(config.allowElevation, {1, 0.5});
+      expect(config.iconSizeTolerance, 2);
+      expect(config.elevationTolerance, 1);
+      expect(DesignCategory.fromKey('icon_size'), DesignCategory.iconSize);
+      expect(DesignCategory.fromKey('iconSize'), isNull);
+    });
+
     test('warns about unknown token categories', () {
       final config = parse('''
 tokens:
-  elevation: { class: AppElevation, file: lib/e.dart }
+  motion: { class: AppMotion, file: lib/m.dart }
   component: { class: X, file: lib/x.dart }
 ''');
       expect(config.tokens, isEmpty);

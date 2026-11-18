@@ -93,6 +93,8 @@ Open the example in your IDE to try the quick fixes, or run
 | [`avoid_raw_radius`](#avoid_raw_radius) | warning | `BorderRadius.circular(8)`, `Radius.circular(8)` |
 | [`avoid_inline_text_style`](#avoid_inline_text_style) | warning | `TextStyle(...)` written by hand |
 | [`avoid_raw_shadow`](#avoid_raw_shadow) | info | `BoxShadow(...)` and lists of them |
+| [`avoid_raw_icon_size`](#avoid_raw_icon_size) | warning | `Icon(size: 22)`, `IconButton(iconSize:)`, `IconThemeData(size:)` |
+| [`avoid_raw_elevation`](#avoid_raw_elevation) | warning | `elevation:` on `Card`, `Material`, `AppBar`, buttons' `styleFrom` and more |
 | [`prefer_design_system_component`](#prefer_design_system_component) | warning | raw widgets that have a replacement |
 
 All rules are on by default. Every rule skips the design-system files, the
@@ -156,17 +158,23 @@ design_token_lints:
     radius:     { class: AppRadius,     file: lib/design_system/app_radius.dart }
     typography: { class: AppTypography, file: lib/design_system/app_typography.dart }
     shadow:     { class: AppShadows,    file: package:acme_design_system/shadows.dart }
+    icon_size:  { class: AppIconSize,   file: lib/design_system/app_icon_size.dart }
+    elevation:  { class: AppElevation,  file: lib/design_system/app_elevation.dart }
 
   # Values that are always fine.
   allow:
     color: [Colors.transparent, 0xFF000000]   # Colors.<name> or an ARGB value
     spacing: [0, 2]                           # 0 is always allowed
     radius: [999]
+    icon_size: [18]
+    elevation: [1]
 
   # When to offer "nearest token" fixes. 0 (the default) means exact only.
   matching:
     spacing_tolerance: 0     # logical pixels
     radius_tolerance: 0      # logical pixels
+    icon_size_tolerance: 0   # logical pixels
+    elevation_tolerance: 0
     color_delta_e: 2.0       # CIEDE2000; around 2 is "barely noticeable"
 
   # Raw widgets and what replaces them.
@@ -305,6 +313,46 @@ BoxDecoration(boxShadow: AppShadows.card)
 **Fix.** Only on an exact structural match with a shadow token (same layers,
 colors, blur, spread and offset).
 
+### avoid_raw_icon_size
+
+Flags numeric literals for icon sizes: `Icon(size:)`, `ImageIcon(size:)`,
+`IconButton(iconSize:)` (and its `filled`, `filledTonal` and `outlined`
+variants) and `IconThemeData(size:)`. `0`, negative numbers, values in
+`allow.icon_size` and non-literal expressions are ignored.
+
+```dart
+// Bad
+Icon(Icons.person, size: 24)
+
+// Good
+Icon(Icons.person, size: AppIconSize.md)
+```
+
+**Fix.** *Replace 24 with AppIconSize.md.* Within
+`matching.icon_size_tolerance`, *Replace 23 with nearest token AppIconSize.md
+(Δ1)*.
+
+### avoid_raw_elevation
+
+Flags numeric literals for Material elevation: `elevation:` on `Material`,
+`Card`, `AppBar` and `SliverAppBar` (also `scrolledUnderElevation:`),
+`BottomAppBar`, `NavigationBar`, `Drawer`, `Dialog`, `AlertDialog`,
+`BottomSheet`, `PopupMenuButton`, `Chip`, `FloatingActionButton` and its
+variants, `PhysicalModel`, `PhysicalShape`, and the `styleFrom` of
+`ElevatedButton`, `FilledButton`, `OutlinedButton` and `TextButton`. `0` and
+values in `allow.elevation` are ignored.
+
+```dart
+// Bad
+Card(elevation: 2, child: content)
+
+// Good
+Card(elevation: AppElevation.card, child: content)
+```
+
+**Fix.** *Replace 2 with AppElevation.card*, and nearest matches within
+`matching.elevation_tolerance`.
+
 ### prefer_design_system_component
 
 Flags construction of a Flutter widget listed under `components:`, from
@@ -418,7 +466,7 @@ dependency would add the analyzer's version constraints to your project.
 ```text
 design_token_lints coverage [path] [--format console|json|markdown]
                             [--output file] [--fail-under 80]
-                            [--category color,spacing,radius,typography,shadow,component]
+                            [--category color,spacing,radius,typography,shadow,icon_size,elevation,component]
 design_token_lints fix [path] [--dry-run] [--rule rule,...]
 design_token_lints baseline [path]
 design_token_lints check-config [path]
@@ -500,8 +548,8 @@ Run the plugin's diagnostics in CI with `dart analyze`:
   configuration root. In a large workspace, give packages that share a design
   system one configuration at the workspace root rather than one each.
 - **Names are matched, not resolved, for constructors.** `EdgeInsets`,
-  `SizedBox`, `Gap`, `BorderRadius`, `Radius`, `TextStyle`, `BoxShadow` and
-  `Color` are recognized by name, so a class of your own with one of those
+  `SizedBox`, `Gap`, `BorderRadius`, `Radius`, `TextStyle`, `BoxShadow`,
+  `Color`, and the icon and elevation widgets are recognized by name, so a class of your own with one of those
   names and constructor shapes is treated the same way. `Colors` and the
   classes under `components:` are checked through the resolved element.
 - **Tokens must be constant.** `static final` members, getters and values that
@@ -533,7 +581,7 @@ ground and run side by side with this plugin in `analysis_options.yaml`.
 
 - **More token sources:** `ThemeExtension` tokens, and importing tokens from
   Figma, Tokens Studio and the W3C Design Tokens format.
-- **More categories:** icon sizes, elevation, and opacity (`withValues`).
+- **More categories:** motion (durations and curves) and opacity tokens.
 - **CI output:** SARIF from the coverage command.
 - **Plugin platform:** per-rule options in `analysis_options.yaml` once the SDK
   supports them ([dart-lang/sdk#63098](https://github.com/dart-lang/sdk/issues/63098)),

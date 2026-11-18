@@ -107,12 +107,32 @@ abstract final class AppShadows {
 }
 ''';
 
+/// The icon sizes of the test design system.
+const appIconSizeSource = '''
+abstract final class AppIconSize {
+  static const double sm = 16;
+  static const double md = 24;
+  static const double lg = 32;
+}
+''';
+
+/// The elevations of the test design system.
+const appElevationSource = '''
+abstract final class AppElevation {
+  static const double low = 1;
+  static const double card = 2;
+  static const double raised = 6;
+}
+''';
+
 const _tokenFiles = {
   'app_colors': appColorsSource,
   'app_spacing': appSpacingSource,
   'app_radius': appRadiusSource,
   'app_typography': appTypographySource,
   'app_shadows': appShadowsSource,
+  'app_icon_size': appIconSizeSource,
+  'app_elevation': appElevationSource,
 };
 
 /// The configuration used by most tests.
@@ -125,6 +145,8 @@ tokens:
   radius: { class: AppRadius, file: lib/design_system/app_radius.dart }
   typography: { class: AppTypography, file: lib/design_system/app_typography.dart }
   shadow: { class: AppShadows, file: lib/design_system/app_shadows.dart }
+  icon_size: { class: AppIconSize, file: lib/design_system/app_icon_size.dart }
+  elevation: { class: AppElevation, file: lib/design_system/app_elevation.dart }
 components:
   ElevatedButton: { replacement: AppButton, import: 'package:acme_ui/acme_ui.dart' }
   Text: { replacement: AppText, import: 'package:acme_ui/acme_ui.dart' }
@@ -138,6 +160,8 @@ import 'package:test/design_system/app_spacing.dart';
 import 'package:test/design_system/app_radius.dart';
 import 'package:test/design_system/app_typography.dart';
 import 'package:test/design_system/app_shadows.dart';
+import 'package:test/design_system/app_icon_size.dart';
+import 'package:test/design_system/app_elevation.dart';
 ''';
 
 /// Base class for tests of one rule.

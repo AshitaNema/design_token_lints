@@ -1,25 +1,33 @@
 /// A category of design-system values that tokens can describe.
 enum DesignCategory {
   /// Colors (`AppColors.primary`).
-  color,
+  color('color'),
 
   /// Spacing values (`AppSpacing.md`).
-  spacing,
+  spacing('spacing'),
 
   /// Corner radii (`AppRadius.md`).
-  radius,
+  radius('radius'),
 
   /// Text styles (`AppTypography.bodyMedium`).
-  typography,
+  typography('typography'),
 
   /// Box shadows (`AppShadows.card`).
-  shadow,
+  shadow('shadow'),
+
+  /// Icon sizes (`AppIconSize.md`).
+  iconSize('icon_size'),
+
+  /// Material elevations (`AppElevation.card`).
+  elevation('elevation'),
 
   /// Replacement widgets (`AppButton` instead of `ElevatedButton`).
-  component;
+  component('component');
+
+  const DesignCategory(this.key);
 
   /// The configuration key and report label of this category.
-  String get key => name;
+  final String key;
 
   /// Whether this category is described by a class under `tokens:`.
   bool get isToken => this != component;
@@ -27,7 +35,7 @@ enum DesignCategory {
   /// Looks up a category by its configuration [key].
   static DesignCategory? fromKey(String key) {
     for (final category in values) {
-      if (category.name == key) return category;
+      if (category.key == key) return category;
     }
     return null;
   }
@@ -50,6 +58,12 @@ enum RuleId {
   /// Hand-written `BoxShadow` literals.
   avoidRawShadow('avoid_raw_shadow', DesignCategory.shadow),
 
+  /// Numeric literals used for icon sizes.
+  avoidRawIconSize('avoid_raw_icon_size', DesignCategory.iconSize),
+
+  /// Numeric literals used for elevations.
+  avoidRawElevation('avoid_raw_elevation', DesignCategory.elevation),
+
   /// Raw widgets that have a design-system replacement.
   preferDesignSystemComponent(
     'prefer_design_system_component',
@@ -62,7 +76,9 @@ enum RuleId {
   bool get offersNearestFixes =>
       this == avoidRawColor ||
       this == avoidMagicSpacing ||
-      this == avoidRawRadius;
+      this == avoidRawRadius ||
+      this == avoidRawIconSize ||
+      this == avoidRawElevation;
 
   /// The diagnostic code, as used in `// ignore:` comments and in reports.
   final String code;
