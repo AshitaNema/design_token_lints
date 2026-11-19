@@ -9,13 +9,15 @@
 Lint rules for your Flutter design system, built on Dart's official analyzer
 plugin system.
 
-- **Flag** raw colors, magic spacing, hand-written radii, text styles and
-  shadows, and raw widgets that have a design-system replacement, in your IDE
-  and in `dart analyze`.
+- **Flag** raw colors, magic spacing, hand-written radii, text styles,
+  shadows, icon sizes and elevations, and raw widgets that have a
+  design-system replacement, in your IDE and in `dart analyze`.
 - **Fix** each one with a quick fix that inserts the matching token from your
-  own classes (`AppColors.primary`, `AppSpacing.md`) and adds the import, or
-  all of them at once with `design_token_lints fix`.
-- **Measure** how much of your UI uses the design system with
+  own classes (`AppColors.primary`, `AppSpacing.md`) or `ThemeExtension`
+  (`context.palette.brand`) and adds the import, or all of them at once with
+  `design_token_lints fix`.
+- **Measure** how much of your UI uses the design system, counting your
+  tokens and Material's `ColorScheme` and `TextTheme`, with
   `design_token_lints coverage`, and fail CI below a threshold.
 - **Adopt gradually** in an existing app: `design_token_lints baseline`
   accepts today's raw values, so only new ones are reported.
@@ -42,7 +44,7 @@ Watch: [quick fixes in VS Code](https://github.com/AshitaNema/design_token_lints
 
    ```yaml
    plugins:
-     design_token_lints: ^0.2.1
+     design_token_lints: ^0.3.0
    ```
 
 2. Describe your design system. Add this to the same file, or to a
@@ -106,7 +108,7 @@ and a `diagnostics` section:
 ```yaml
 plugins:
   design_token_lints:
-    version: ^0.2.1
+    version: ^0.3.0
     diagnostics:
       avoid_raw_shadow: false
       avoid_magic_spacing: error
