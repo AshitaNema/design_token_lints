@@ -1,5 +1,12 @@
 ## Unreleased
 
+- `ThemeExtension` tokens: a token source with `instance:` reads the fields of
+  a `static const` instance (`static const light = AppPalette(brand: …)`),
+  with an optional `access:` template (`context.palette.{name}`, by default
+  `Theme.of(context).extension<AppPalette>()!.{name}`) and `import:`. Fixes
+  are offered only where the result compiles: with a `BuildContext context`
+  in scope and outside constants. Reads of the extension's fields count in
+  `coverage`.
 - Coverage counts colors read from Flutter's `ColorScheme` and text styles
   read from its `TextTheme` (`Theme.of(context).colorScheme.primary`,
   `TextTheme.of(context).bodyMedium`) as color and typography uses. Apps

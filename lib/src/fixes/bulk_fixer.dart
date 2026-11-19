@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import '../config/config.dart';
 import '../config/config_loader.dart';
 import '../config/rule_id.dart';
+import '../detectors/applicability.dart';
 import '../detectors/finding.dart';
 import '../report/project_analyzer.dart';
 import 'ignore_comments.dart';
@@ -93,6 +94,7 @@ final class FixOutcome {
     required this.applied,
     required this.skipped,
     required this.withoutExactToken,
+    this.notApplicable = 0,
     required this.configured,
     required this.errors,
     required this.warnings,
@@ -106,6 +108,10 @@ final class FixOutcome {
 
   /// Findings that have no exact token and were left for a person.
   final int withoutExactToken;
+
+  /// Findings whose exact token cannot be used where they are: a
+  /// `ThemeExtension` token outside any `BuildContext`, or in a constant.
+  final int notApplicable;
 
   /// Whether any configuration applied to the analyzed files.
   final bool configured;
@@ -149,6 +155,7 @@ final class BulkFixer {
     final applied = <AppliedFix>[];
     final skipped = <SkippedFix>[];
     var withoutExact = 0;
+    var notApplicable = 0;
     var configured = false;
     final pending = <String, String>{};
 
@@ -171,9 +178,16 @@ final class BulkFixer {
         final candidates = <(Finding, TokenSuggestion)>[];
         for (final finding in visit.findings()) {
           if (ignores.ignores(finding.rule, finding.offset)) continue;
-          final exact = finding.exact;
+          final exact = [
+            for (final suggestion in finding.exact)
+              if (canApply(suggestion, finding.node)) suggestion,
+          ];
           if (exact.isEmpty) {
-            withoutExact++;
+            if (finding.exact.isEmpty) {
+              withoutExact++;
+            } else {
+              notApplicable++;
+            }
           } else if (exact.length > 1) {
             final position = at(finding.offset);
             skipped.add(
@@ -236,7 +250,9 @@ final class BulkFixer {
               final prefix = edit
                   .importLibraryElement(Uri.parse(import))
                   .prefix;
-              if (prefix != null) replacement = '$prefix.$replacement';
+              if (prefix != null && !suggestion.entry.isInstanceField) {
+                replacement = '$prefix.$replacement';
+              }
             }
             replacements[suggestion] = replacement;
             edit.addSimpleReplacement(
@@ -294,6 +310,7 @@ final class BulkFixer {
               _compare((a.path, a.line, a.column), (b.path, b.line, b.column)),
         ),
       withoutExactToken: withoutExact,
+      notApplicable: notApplicable,
       configured: configured,
       errors: const [],
       warnings: walk.warnings,

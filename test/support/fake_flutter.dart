@@ -243,6 +243,7 @@ class ThemeData {
   const ThemeData({required this.colorScheme, required this.textTheme});
   final ColorScheme colorScheme;
   final TextTheme textTheme;
+  T? extension<T>() => null;
 }
 
 class Theme {
@@ -250,6 +251,23 @@ class Theme {
     colorScheme: ColorScheme(primary: Color(0xFF000000)),
     textTheme: TextTheme(),
   );
+}
+abstract class ThemeExtension<T extends ThemeExtension<T>> {
+  const ThemeExtension();
+}
+
+abstract class StatelessWidget extends Widget {
+  const StatelessWidget();
+  Widget build(BuildContext context);
+}
+
+abstract class StatefulWidget extends Widget {
+  const StatefulWidget();
+}
+
+abstract class State<T extends StatefulWidget> {
+  BuildContext get context => BuildContext();
+  Widget build(BuildContext context);
 }
 ''';
 
@@ -302,6 +320,7 @@ class ThemeData {
   const ThemeData({required this.colorScheme, required this.textTheme});
   final ColorScheme colorScheme;
   final TextTheme textTheme;
+  T? extension<T>() => null;
 }
 
 class Theme {

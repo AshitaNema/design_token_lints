@@ -43,13 +43,37 @@ class ConfigIssue {
 /// The class that holds the tokens of one [DesignCategory].
 class TokenSource {
   /// Creates a token source.
-  const TokenSource({required this.className, required this.file});
+  const TokenSource({
+    required this.className,
+    required this.file,
+    this.instance,
+    this.access,
+    this.import,
+  });
 
   /// The name of the class, for example `AppColors`.
   final String className;
 
   /// A path relative to the configuration directory, or a `package:` URI.
   final String file;
+
+  /// For a `ThemeExtension` (or any class whose tokens are instance fields),
+  /// the `static const` instance whose constructor arguments are the token
+  /// values, for example `light`. `null` for a class of `static const`
+  /// tokens.
+  final String? instance;
+
+  /// How code reads a token of an [instance]-based class, with `{name}` for
+  /// the field, for example `context.palette.{name}`.
+  final String? access;
+
+  /// The library a fix imports to make [access] work, instead of the token
+  /// file.
+  final String? import;
+
+  /// The default [access] of an [instance]-based class.
+  static String defaultAccess(String className) =>
+      'Theme.of(context).extension<$className>()!.{name}';
 }
 
 /// A raw widget and the design-system widget that replaces it.
@@ -345,8 +369,44 @@ class DtlConfig {
         reader.error('tokens.$key: both "class" and "file" must be strings.');
         continue;
       }
-      reader.unknownKeys(source, const {'class', 'file'}, 'tokens.$key');
-      result[category] = TokenSource(className: className, file: file);
+      reader.unknownKeys(source, const {
+        'class',
+        'file',
+        'instance',
+        'access',
+        'import',
+      }, 'tokens.$key');
+      final instance = source['instance'];
+      final access = source['access'];
+      final import = source['import'];
+      if (instance != null && instance is! String) {
+        reader.error('tokens.$key: "instance" must be a string.');
+        continue;
+      }
+      if ((access != null && access is! String) ||
+          (import != null && import is! String)) {
+        reader.error('tokens.$key: "access" and "import" must be strings.');
+        continue;
+      }
+      if (instance == null && (access != null || import != null)) {
+        reader.warn(
+          'tokens.$key: "access" and "import" apply only with "instance"; '
+          'they are ignored.',
+        );
+      }
+      if (access is String && !access.contains('{name}')) {
+        reader.error('tokens.$key: "access" must contain {name}.');
+        continue;
+      }
+      result[category] = TokenSource(
+        className: className,
+        file: file,
+        instance: instance as String?,
+        access: instance == null
+            ? null
+            : (access as String?) ?? TokenSource.defaultAccess(className),
+        import: instance == null ? null : import as String?,
+      );
     }
     return result;
   }

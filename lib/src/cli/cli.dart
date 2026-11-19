@@ -338,6 +338,16 @@ Future<int> _fix(
     SkipReason.overlap,
     'Not fixed, inside another fix (run the command again):',
   );
+  final misplaced = outcome.notApplicable;
+  if (misplaced > 0) {
+    out
+      ..writeln()
+      ..writeln(
+        '$misplaced ${misplaced == 1 ? 'issue matches' : 'issues match'} a '
+        'token that cannot be used there (no BuildContext named context in '
+        'scope, or a constant); "dart analyze" lists them.',
+      );
+  }
   final left = outcome.withoutExactToken;
   if (left > 0) {
     out

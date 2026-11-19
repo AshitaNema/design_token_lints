@@ -6,6 +6,7 @@ import '../tokens/nearest_token_matcher.dart';
 import '../tokens/static_evaluator.dart';
 import '../tokens/token_index.dart';
 import '../tokens/token_value.dart';
+import 'applicability.dart';
 import 'detector.dart';
 import 'element_checks.dart';
 import 'finding.dart';
@@ -126,10 +127,7 @@ final class ColorDetector extends Detector {
   ) {
     final alpha = (argb >> 24) & 0xFF;
     if (alpha == 0xFF) return const [];
-    if (node is! Expression || node.inConstantContext) return const [];
-    if (node.thisOrAncestorOfType<FormalParameterDefaultClause>() != null) {
-      return const [];
-    }
+    if (!allowsNonConstant(node)) return const [];
     final rgb = argb & 0xFFFFFF;
     final text = alphaLiteral(alpha);
     return [

@@ -6,6 +6,7 @@ import 'package:analyzer_plugin/utilities/fixes/fixes.dart';
 
 import '../config/config_loader.dart';
 import '../config/rule_id.dart';
+import '../detectors/applicability.dart';
 import '../detectors/detectors.dart';
 import '../detectors/finding.dart';
 
@@ -84,7 +85,10 @@ final class TokenFix extends ResolvedCorrectionProducer {
   Future<void> compute(ChangeBuilder builder) async {
     final finding = _findFinding();
     if (finding == null) return;
-    final candidates = nearest ? finding.nearest : finding.exact;
+    final candidates = [
+      for (final suggestion in nearest ? finding.nearest : finding.exact)
+        if (canApply(suggestion, finding.node)) suggestion,
+    ];
     if (rank >= candidates.length) return;
     final suggestion = candidates[rank];
     final detail = nearest
@@ -97,7 +101,10 @@ final class TokenFix extends ResolvedCorrectionProducer {
       final import = suggestion.importUri;
       if (import != null) {
         final prefix = edit.importLibraryElement(Uri.parse(import)).prefix;
-        if (prefix != null) replacement = '$prefix.$replacement';
+        // A template such as `context.palette.brand` is not qualified.
+        if (prefix != null && !suggestion.entry.isInstanceField) {
+          replacement = '$prefix.$replacement';
+        }
       }
       edit.addSimpleReplacement(
         SourceRange(suggestion.offset, suggestion.length),

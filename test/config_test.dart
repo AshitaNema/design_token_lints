@@ -145,6 +145,74 @@ matching:
       expect(DesignCategory.fromKey('iconSize'), isNull);
     });
 
+    group('instance tokens', () {
+      test('default access', () {
+        final config = parse('''
+tokens:
+  color: { class: AppPalette, file: lib/p.dart, instance: light }
+''');
+        expect(config.issues, isEmpty);
+        final source = config.tokens[DesignCategory.color]!;
+        expect(source.instance, 'light');
+        expect(
+          source.access,
+          'Theme.of(context).extension<AppPalette>()!.{name}',
+        );
+        expect(source.import, isNull);
+      });
+
+      test('custom access and import', () {
+        final config = parse('''
+tokens:
+  color:
+    class: AppPalette
+    file: lib/p.dart
+    instance: light
+    access: "context.palette.{name}"
+    import: package:acme/theme.dart
+''');
+        final source = config.tokens[DesignCategory.color]!;
+        expect(source.access, 'context.palette.{name}');
+        expect(source.import, 'package:acme/theme.dart');
+      });
+
+      test('access must contain {name}', () {
+        final config = parse('''
+tokens:
+  color: { class: AppPalette, file: lib/p.dart, instance: light, access: context.palette }
+''');
+        expect(config.tokens, isEmpty);
+        expect(config.issues.single.message, contains('{name}'));
+      });
+
+      test('access and import without instance are ignored', () {
+        final config = parse('''
+tokens:
+  color: { class: AppColors, file: lib/c.dart, access: "x.{name}" }
+''');
+        final source = config.tokens[DesignCategory.color]!;
+        expect(source.access, isNull);
+        expect(config.issues.single.severity, ConfigIssueSeverity.warning);
+      });
+
+      test('values must be strings', () {
+        expect(
+          parse('''
+tokens:
+  color: { class: AppPalette, file: lib/p.dart, instance: 1 }
+''').tokens,
+          isEmpty,
+        );
+        expect(
+          parse('''
+tokens:
+  color: { class: AppPalette, file: lib/p.dart, instance: light, import: 1 }
+''').tokens,
+          isEmpty,
+        );
+      });
+    });
+
     test('warns about unknown token categories', () {
       final config = parse('''
 tokens:

@@ -21,7 +21,11 @@ final class UsageCounter extends RecursiveAstVisitor<void> {
       if (category == DesignCategory.component) continue;
       final entries = project.index.of(category);
       for (final entry in entries) {
-        _classCategories[entry.className] = category;
+        if (entry.isInstanceField) {
+          (_instanceMembers[entry.className] ??= {})[entry.name] = category;
+        } else {
+          _classCategories[entry.className] = category;
+        }
       }
     }
     for (final replacement in project.config.components.values) {
@@ -46,6 +50,9 @@ final class UsageCounter extends RecursiveAstVisitor<void> {
   };
 
   final Map<String, DesignCategory> _classCategories = {};
+
+  /// For `ThemeExtension`-style classes, field name to category by class.
+  final Map<String, Map<String, DesignCategory>> _instanceMembers = {};
   final Set<String> _componentClasses = {};
 
   void _count(DesignCategory category) {
@@ -67,15 +74,27 @@ final class UsageCounter extends RecursiveAstVisitor<void> {
     }
   }
 
+  /// Counts a read of the token field [member] from an instance of a
+  /// configured `ThemeExtension`-style class.
+  void _countInstanceMember(Expression? target, String member) {
+    if (_instanceMembers.isEmpty) return;
+    final type = target?.staticType;
+    if (type is! InterfaceType) return;
+    final category = _instanceMembers[type.element.name]?[member];
+    if (category != null) _count(category);
+  }
+
   @override
   void visitPropertyAccess(PropertyAccess node) {
     _countThemeMember(node.realTarget, node);
+    _countInstanceMember(node.realTarget, node.propertyName.name);
     super.visitPropertyAccess(node);
   }
 
   @override
   void visitPrefixedIdentifier(PrefixedIdentifier node) {
     _countThemeMember(node.prefix, node);
+    _countInstanceMember(node.prefix, node.identifier.name);
     final prefix = node.prefix.element;
     if (prefix is InterfaceElement) {
       final category = _classCategories[prefix.name];
