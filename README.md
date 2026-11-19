@@ -460,6 +460,13 @@ configured replacement widget); a raw value is what the rules above report. The
 overall figure weights every use and every raw value equally. It runs the same
 detectors as the plugin, so the numbers match what the IDE shows.
 
+Colors read from Flutter's `ColorScheme` and text styles read from its
+`TextTheme` count as uses too, because they come from the app's theme:
+`Theme.of(context).colorScheme.primary`, `ColorScheme.of(context).surface`,
+`Theme.of(context).textTheme.bodyMedium`, or a local `scheme.primary`. They
+are recognized by type, from `package:flutter` or `package:material_ui`, so a
+class of your own with the same name does not count.
+
 Install the command line tool globally, not as a dev dependency. A dev
 dependency would add the analyzer's version constraints to your project.
 

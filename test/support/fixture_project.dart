@@ -22,6 +22,12 @@ final class FixtureProject {
       p.join(flutter, 'material.dart'),
     ).writeAsStringSync(fakeFlutterMaterial);
 
+    final materialUi = p.join(temp.path, '_packages', 'material_ui', 'lib');
+    Directory(materialUi).createSync(recursive: true);
+    File(
+      p.join(materialUi, 'material_ui.dart'),
+    ).writeAsStringSync(fakeMaterialUi);
+
     final config = File(p.join(root, '.dart_tool', 'package_config.json'));
     config.parent.createSync(recursive: true);
     config.writeAsStringSync('''
@@ -31,6 +37,12 @@ final class FixtureProject {
     {
       "name": "flutter",
       "rootUri": "${Uri.directory(p.join(temp.path, '_packages', 'flutter'))}",
+      "packageUri": "lib/",
+      "languageVersion": "3.11"
+    },
+    {
+      "name": "material_ui",
+      "rootUri": "${Uri.directory(p.join(temp.path, '_packages', 'material_ui'))}",
       "packageUri": "lib/",
       "languageVersion": "3.11"
     },
