@@ -348,6 +348,185 @@ tokens:
     });
   });
 
+  group('theme extensions', () {
+    const palette = '''
+import 'package:flutter/material.dart';
+
+const _brandBlue = Color(0xFF1E88E5);
+
+class AppPalette extends ThemeExtension<AppPalette> {
+  const AppPalette({
+    required this.brand,
+    required this.surface,
+    required Color legacy,
+    required this.gap,
+  }) : _legacy = legacy;
+  const AppPalette.positional(this.brand, this.surface, this.gap, Color legacy)
+    : _legacy = legacy;
+
+  final Color brand;
+  final Color surface;
+  final Color _legacy;
+  final double gap;
+
+  static const light = AppPalette(
+    brand: _brandBlue,
+    surface: Color(0xFFFAFAFA),
+    legacy: Color(0xFF111111),
+    gap: 8,
+  );
+  static const dark = AppPalette.positional(
+    Color(0xFF90CAF9),
+    Color(0xFF121212),
+    12,
+    Color(0xFF000000),
+  );
+  static final runtime = AppPalette(
+    brand: _brandBlue,
+    surface: _brandBlue,
+    legacy: _brandBlue,
+    gap: 1,
+  );
+  static const notAPalette = Color(0xFF000000);
+}
+''';
+
+    test('reads the fields of a named-argument instance', () {
+      write('palette', palette);
+      final index = build('''
+tokens:
+  color: { class: AppPalette, file: lib/palette.dart, instance: light }
+''');
+      expect(index.issues, isEmpty);
+      final colors = {
+        for (final e in index.of(DesignCategory.color))
+          e.name: (e.value as ColorValue).argb,
+      };
+      expect(colors, {'brand': 0xFF1E88E5, 'surface': 0xFFFAFAFA});
+      expect(index.skipped.map((s) => (s.reference, s.reason)), [
+        (
+          'AppPalette.light.legacy',
+          'The argument does not initialize a field (this.legacy).',
+        ),
+        ('AppPalette.light.gap', 'The value cannot be evaluated statically.'),
+      ]);
+      final brand = entry(index, DesignCategory.color, 'brand');
+      expect(brand.isInstanceField, isTrue);
+      expect(brand.needsContext, isTrue);
+      expect(
+        brand.reference,
+        'Theme.of(context).extension<AppPalette>()!.brand',
+      );
+      expect(brand.importUri, 'package:acme/palette.dart');
+    });
+
+    test('reads positional arguments through this.field parameters', () {
+      write('palette', palette);
+      final index = build('''
+tokens:
+  spacing: { class: AppPalette, file: lib/palette.dart, instance: dark }
+''');
+      expect(
+        (entry(index, DesignCategory.spacing, 'gap').value as NumberValue)
+            .value,
+        12,
+      );
+      expect(
+        index.skipped.map((s) => s.reference),
+        containsAll([
+          'AppPalette.dark.brand',
+          'AppPalette.dark.surface',
+          'AppPalette.dark.#3',
+        ]),
+      );
+    });
+
+    test('a custom access template and import', () {
+      write('palette', palette);
+      final index = build('''
+tokens:
+  color:
+    class: AppPalette
+    file: lib/palette.dart
+    instance: light
+    access: "context.palette.{name}"
+    import: package:acme/theme.dart
+''');
+      final brand = entry(index, DesignCategory.color, 'brand');
+      expect(brand.reference, 'context.palette.brand');
+      expect(brand.importUri, 'package:acme/theme.dart');
+    });
+
+    test('a template without context does not need one', () {
+      write('palette', palette);
+      final index = build('''
+tokens:
+  color:
+    class: AppPalette
+    file: lib/palette.dart
+    instance: light
+    access: "AppPalette.light.{name}"
+''');
+      final brand = entry(index, DesignCategory.color, 'brand');
+      expect(brand.isInstanceField, isTrue);
+      expect(brand.needsContext, isFalse);
+    });
+
+    for (final instance in ['missing', 'runtime', 'notAPalette']) {
+      test('"$instance" is not a usable instance', () {
+        write('palette', palette);
+        final index = build('''
+tokens:
+  color: { class: AppPalette, file: lib/palette.dart, instance: $instance }
+''');
+        expect(index.hasCategory(DesignCategory.color), isFalse);
+        expect(
+          index.issues.single.message,
+          contains('"AppPalette.$instance" is not a static const instance'),
+        );
+      });
+    }
+
+    test('arguments can refer to other constants of the class', () {
+      write('palette', '''
+import 'package:flutter/material.dart';
+class AppPalette {
+  const AppPalette({required this.brand, required this.accent});
+  final Color brand;
+  final Color accent;
+  static const blue = Color(0xFF1E88E5);
+  static const light = AppPalette(brand: AppPalette.blue, accent: blue);
+}
+''');
+      final index = build('''
+tokens:
+  color: { class: AppPalette, file: lib/palette.dart, instance: light }
+''');
+      expect(
+        {
+          for (final e in index.of(DesignCategory.color))
+            e.name: (e.value as ColorValue).argb,
+        },
+        {'brand': 0xFF1E88E5, 'accent': 0xFF1E88E5},
+      );
+    });
+
+    test('a constructor that is not declared is reported', () {
+      write('palette', '''
+import 'package:flutter/material.dart';
+class AppPalette {
+  const AppPalette();
+  static const light = AppPalette.missing();
+}
+''');
+      final index = build('''
+tokens:
+  color: { class: AppPalette, file: lib/palette.dart, instance: light }
+''');
+      expect(index.issues.single.message, contains('AppPalette.light'));
+    });
+  });
+
   group('test fixtures', () {
     test('the shared token sources parse completely', () {
       write('app_colors', appColorsSource);

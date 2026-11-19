@@ -84,6 +84,17 @@ import the token file, so there is no element to resolve against.
 `file:` accepts a path or a `package:` URI, resolved through the nearest
 `.dart_tool/package_config.json`.
 
+A token source with `instance:` describes a `ThemeExtension`. The index reads
+that `static const` field's constructor call, finds the constructor in the
+same class, and maps each argument to a field through its initializing formal
+(`this.brand`). Its entries carry the `access` template, which becomes their
+`reference`; they are not constants. `canApply` (`detectors/applicability.dart`)
+lets a fix use such a token only where a non-constant expression is allowed
+and, when the template mentions `context`, where a `BuildContext context` is
+in scope: a parameter of an enclosing function, method or closure, or an
+instance member of a class that extends `State`. Messages show the template
+everywhere.
+
 ## Detectors
 
 A `Detector` declares the `NodeKind`s it inspects and implements
@@ -198,8 +209,8 @@ supported.
 ## Known limitations
 
 - Constructors other than `Colors` and the components are matched by name.
-- Tokens must be constant; `static final`, getters and `ThemeExtension` tokens
-  are skipped.
+- Tokens must be constant; `static final` members and getters are skipped.
+  `ThemeExtension` tokens are read from a `static const` instance.
 - Plugin fixes cannot be applied in bulk by `dart fix`; the `fix` command
   covers exact fixes.
 - The `Colors` table follows the Flutter version it was generated from.

@@ -252,6 +252,86 @@ Color a(ColorScheme scheme) => scheme.primary;
       });
     });
 
+    group('theme extension tokens', () {
+      setUp(() {
+        project.write('lib/design_system/app_palette.dart', '''
+import 'package:flutter/material.dart';
+
+class AppPalette extends ThemeExtension<AppPalette> {
+  const AppPalette({required this.brand, required this.surface});
+  final Color brand;
+  final Color surface;
+
+  static const light = AppPalette(
+    brand: Color(0xFF1E88E5),
+    surface: Color(0xFFFAFAFA),
+  );
+}
+''');
+        project.write('design_token_lints.yaml', '''
+design_system:
+  paths: [lib/design_system/**]
+tokens:
+  color: { class: AppPalette, file: lib/design_system/app_palette.dart, instance: light }
+allow:
+  color: [Colors.transparent]
+exclude: ["test/**"]
+''');
+        project.write('lib/screens/legacy_checkout.dart', '''
+import 'package:acme/design_system/app_palette.dart';
+import 'package:flutter/material.dart';
+
+final top = Color(0xFF1E88E5);
+Color build(BuildContext context) => Color(0xFFFAFAFA);
+Color read(BuildContext context, AppPalette palette) => palette.brand;
+Color viaTheme(BuildContext context) =>
+    Theme.of(context).extension<AppPalette>()!.surface;
+Color constant() => AppPalette.light.brand;
+''');
+      });
+
+      test('coverage counts field reads once each', () async {
+        final result = await run(['coverage', '--format', 'json']);
+        final json = jsonDecode(result.out) as Map<String, Object?>;
+        final color =
+            (json['categories']! as Map<String, Object?>)['color']!
+                as Map<String, Object?>;
+        expect(color['usages'], 3);
+        expect(color['findings'], 2);
+      });
+
+      test('fix applies where a context is in scope', () async {
+        final result = await run(['fix']);
+        expect(result.out, contains('Fixed 1 issue in 1 file.'));
+        expect(
+          result.out,
+          contains('1 issue matches a token that cannot be used there'),
+        );
+        expect(result.out, isNot(contains('no exact token')));
+        final fixed = File(
+          p.join(project.root, 'lib', 'screens', 'legacy_checkout.dart'),
+        ).readAsStringSync();
+        expect(fixed, contains('final top = Color(0xFF1E88E5);'));
+        expect(
+          fixed,
+          contains(
+            'Color build(BuildContext context) => '
+            'Theme.of(context).extension<AppPalette>()!.surface;',
+          ),
+        );
+      });
+
+      test('check-config lists the templates', () async {
+        final result = await run(['check-config']);
+        expect(
+          result.out,
+          contains(
+            '  Theme.of(context).extension<AppPalette>()!.brand = 0xFF1E88E5',
+          ),
+        );
+      });
+    });
+
     test('a clean project reports full coverage', () async {
       project.delete('lib/screens/legacy_checkout.dart');
       final result = await run(['coverage', '--fail-under', '100']);

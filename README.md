@@ -208,6 +208,55 @@ statically. These forms are understood:
 Members that cannot be evaluated (computed values, `static final`, getters) are
 skipped. `design_token_lints check-config` lists them.
 
+### ThemeExtension tokens
+
+Tokens that live in a `ThemeExtension` are read from one of its `static const`
+instances. Name the instance, and say how code reads a token:
+
+```dart
+class AppPalette extends ThemeExtension<AppPalette> {
+  const AppPalette({required this.brand, required this.surface});
+  final Color brand;
+  final Color surface;
+
+  static const light = AppPalette(
+    brand: Color(0xFF6750A4),
+    surface: Color(0xFFFEF7FF),
+  );
+  // copyWith, lerp …
+}
+
+extension PaletteContext on BuildContext {
+  AppPalette get palette => Theme.of(this).extension<AppPalette>()!;
+}
+```
+
+```yaml
+tokens:
+  color:
+    class: AppPalette
+    file: lib/theme/app_palette.dart
+    instance: light
+    access: "context.palette.{name}"   # optional
+    import: package:acme/theme.dart    # optional: the library a fix imports
+```
+
+Each argument of the instance's constructor call is a token, mapped to its
+field through the constructor's `this.field` parameter; an argument that does
+not initialize a field is skipped. Without `access`, tokens read as
+`Theme.of(context).extension<AppPalette>()!.brand`.
+
+Messages always name the token, for example *Try using context.palette.brand*.
+The fix, in the IDE and in `design_token_lints fix`, is offered only where the
+result compiles: where a `BuildContext context` is in scope (a parameter, an
+untyped builder parameter such as `(context) => …`, or an instance member of a
+`State`) and not in a constant or a default value. Elsewhere, `fix` reports
+the value as matching a token that cannot be used there.
+
+Reads of the extension's fields (`context.palette.brand`,
+`Theme.of(context).extension<AppPalette>()!.surface`) count as token uses in
+`coverage`.
+
 ## Rules
 
 ### avoid_raw_color
@@ -560,7 +609,12 @@ Run the plugin's diagnostics in CI with `dart analyze`:
   names and constructor shapes is treated the same way. `Colors` and the
   classes under `components:` are checked through the resolved element.
 - **Tokens must be constant.** `static final` members, getters and values that
-  need runtime evaluation (`ThemeExtension` tokens) are not read.
+  need runtime evaluation are not read. `ThemeExtension` tokens are read from
+  a `static const` instance (see [ThemeExtension tokens](#themeextension-tokens)).
+- **"Context in scope" is checked by name.** A `ThemeExtension` fix that uses
+  `context` is offered next to a parameter called `context` typed
+  `BuildContext` (or untyped, as in builders) or inside a `State`, not next to
+  a context with another name.
 - **No `dart fix`.** The analysis server does not apply plugin fixes in bulk,
   so `dart fix` ignores them. Use [`design_token_lints fix`](#fix-everything)
   instead.
@@ -586,8 +640,8 @@ ground and run side by side with this plugin in `analysis_options.yaml`.
 
 ## Roadmap
 
-- **More token sources:** `ThemeExtension` tokens, and importing tokens from
-  Figma, Tokens Studio and the W3C Design Tokens format.
+- **More token sources:** importing tokens from Figma, Tokens Studio and the
+  W3C Design Tokens format.
 - **More categories:** motion (durations and curves) and opacity tokens.
 - **CI output:** SARIF from the coverage command.
 - **Plugin platform:** per-rule options in `analysis_options.yaml` once the SDK
