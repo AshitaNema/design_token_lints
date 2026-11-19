@@ -1,4 +1,6 @@
-## Unreleased
+## 0.3.0
+
+Reach: more of a real design system.
 
 - `ThemeExtension` tokens: a token source with `instance:` reads the fields of
   a `static const` instance (`static const light = AppPalette(brand: …)`),
