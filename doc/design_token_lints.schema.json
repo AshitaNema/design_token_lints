@@ -195,6 +195,49 @@
           "description": "https://github.com/AshitaNema/design_token_lints#prefer_design_system_component"
         }
       }
+    },
+    "design_tokens": {
+      "type": "object",
+      "description": "A design tokens file (Design Tokens Format Module 2025.10, for example exported from Figma or Tokens Studio) to compare with the Dart tokens: design_token_lints check-tokens. https://github.com/AshitaNema/design_token_lints#design-tokens-from-figma",
+      "required": [
+        "file",
+        "map"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "The design tokens JSON file, relative to this file."
+        },
+        "map": {
+          "type": "object",
+          "description": "For each token category, the group of the design tokens file it is compared with.",
+          "additionalProperties": false,
+          "properties": {
+            "color": {
+              "$ref": "#/definitions/designTokenGroup"
+            },
+            "spacing": {
+              "$ref": "#/definitions/designTokenGroup"
+            },
+            "radius": {
+              "$ref": "#/definitions/designTokenGroup"
+            },
+            "typography": {
+              "$ref": "#/definitions/designTokenGroup"
+            },
+            "shadow": {
+              "$ref": "#/definitions/designTokenGroup"
+            },
+            "icon_size": {
+              "$ref": "#/definitions/designTokenGroup"
+            },
+            "elevation": {
+              "$ref": "#/definitions/designTokenGroup"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -264,6 +307,26 @@
             "type": "string"
           },
           "description": "Globs of files this rule skips."
+        }
+      }
+    },
+    "designTokenGroup": {
+      "type": "object",
+      "required": [
+        "group"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "group": {
+          "type": "string",
+          "description": "The dotted path of the group, for example color or color.brand."
+        },
+        "names": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Dart member names for token paths in the group whose camelCase name is not wanted or not an identifier, for example \"4\": xs."
         }
       }
     }

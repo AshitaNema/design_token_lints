@@ -171,6 +171,19 @@ the matcher also sees ignored findings. `BaselineWriter` therefore records
 every finding, ignored or not. When it runs on a subdirectory it keeps the
 entries for files outside it.
 
+## Design tokens files
+
+`lib/src/design_tokens/` reads design tokens files and compares them with the
+Dart tokens (`check-tokens`). `DesignTokenFile.parse` walks groups and tokens
+of the Design Tokens Format Module 2025.10 with `$type` inheritance, and
+resolves `{group.token}` aliases and `$ref` JSON pointers, following chains and
+reporting cycles. `compareDesignTokens` converts each token of a mapped group
+into the `TokenValue` the Dart side uses (`ColorValue`, `NumberValue`,
+`TextStyleValue`, `ShadowValue`), so equality means the same thing on both
+sides, and matches it to a Dart member by camelCase name or a configured
+override. A token that cannot be converted is reported as not compared, and
+still counts as present, so its Dart counterpart is not reported as missing.
+
 ## Coverage
 
 `ProjectAnalyzer` builds an `AnalysisContextCollection` over the target

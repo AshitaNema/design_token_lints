@@ -44,6 +44,18 @@ void main() {
     expect(keysOf(definition('tokenSource')), ConfigKeys.tokenSource);
     expect(keysOf(definition('component')), ConfigKeys.component);
     expect(keysOf(definition('ruleOptions')), ConfigKeys.rule);
+    expect(keysOf(section('design_tokens')), ConfigKeys.designTokens);
+    expect(keysOf(definition('designTokenGroup')), ConfigKeys.designTokenGroup);
+    expect(
+      keysOf(
+        object(section('design_tokens'), 'properties')['map']!
+            as Map<String, Object?>,
+      ),
+      {
+        for (final category in DesignCategory.values)
+          if (category.isToken) category.key,
+      },
+    );
   });
 
   test('token categories and rules', () {
@@ -64,6 +76,8 @@ void main() {
       section('allow'),
       section('matching'),
       section('rules'),
+      section('design_tokens'),
+      definition('designTokenGroup'),
       definition('tokenSource'),
       definition('component'),
       definition('ruleOptions'),
