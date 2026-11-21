@@ -1,6 +1,10 @@
 import 'dart:convert';
 
+import 'package:analyzer/error/error.dart';
+
 import '../config/rule_id.dart';
+import '../rules/design_token_rule.dart';
+import '../version.dart';
 import 'coverage_report.dart';
 
 /// The output formats of the coverage command.
@@ -12,7 +16,10 @@ enum ReportFormat {
   json,
 
   /// A compact Markdown summary, suitable for a pull-request comment.
-  markdown;
+  markdown,
+
+  /// SARIF 2.1.0, for GitHub code scanning and other SARIF viewers.
+  sarif;
 
   /// Looks up a format by name.
   static ReportFormat? fromName(String name) {
@@ -31,12 +38,111 @@ const int jsonSchemaVersion = 1;
 const String markdownMarker = '<!-- design-token-lints -->';
 
 /// Renders [report] in [format].
-String renderReport(CoverageReport report, ReportFormat format) =>
-    switch (format) {
-      ReportFormat.console => renderConsole(report),
-      ReportFormat.json => renderJson(report),
-      ReportFormat.markdown => renderMarkdown(report),
-    };
+///
+/// [pathPrefix] is prepended to file paths in SARIF output, so that they are
+/// relative to the repository root rather than to the analyzed directory.
+String renderReport(
+  CoverageReport report,
+  ReportFormat format, {
+  String pathPrefix = '',
+}) => switch (format) {
+  ReportFormat.console => renderConsole(report),
+  ReportFormat.json => renderJson(report),
+  ReportFormat.markdown => renderMarkdown(report),
+  ReportFormat.sarif => renderSarif(report, pathPrefix: pathPrefix),
+};
+
+/// The README section that documents [rule].
+String ruleHelpUri(RuleId rule) =>
+    'https://github.com/AshitaNema/design_token_lints#${rule.code}';
+
+String _sarifLevel(RuleId rule) => switch (DtlCodes.of(rule).severity) {
+  DiagnosticSeverity.ERROR => 'error',
+  DiagnosticSeverity.INFO => 'note',
+  _ => 'warning',
+};
+
+/// Renders [report] as a SARIF 2.1.0 log for GitHub code scanning.
+///
+/// Every rule is described, whether or not it has results, so rule ids and
+/// indexes are stable across runs. Findings accepted by a baseline are left
+/// out, as they are in the IDE. File paths are [pathPrefix] followed by the
+/// report's paths, with `/` separators.
+String renderSarif(CoverageReport report, {String pathPrefix = ''}) {
+  const rules = RuleId.values;
+  final results = <Map<String, Object?>>[];
+  for (final file in report.files) {
+    for (final finding in file.findings) {
+      if (finding.baselined) continue;
+      results.add({
+        'ruleId': finding.rule.code,
+        'ruleIndex': rules.indexOf(finding.rule),
+        'level': _sarifLevel(finding.rule),
+        'message': {
+          'text': [finding.message, ?finding.correction].join(' '),
+        },
+        'locations': [
+          {
+            'physicalLocation': {
+              'artifactLocation': {'uri': '$pathPrefix${file.path}'},
+              'region': {
+                'startLine': finding.line,
+                'startColumn': finding.column,
+                'endLine': finding.endLine,
+                'endColumn': finding.endColumn,
+              },
+            },
+          },
+        ],
+      });
+    }
+  }
+  final document = <String, Object?>{
+    r'$schema': 'https://json.schemastore.org/sarif-2.1.0.json',
+    'version': '2.1.0',
+    'runs': [
+      {
+        'tool': {
+          'driver': {
+            'name': 'design_token_lints',
+            'version': packageVersion,
+            'informationUri': 'https://pub.dev/packages/design_token_lints',
+            'rules': [
+              for (final rule in rules)
+                {
+                  'id': rule.code,
+                  'name': rule.code,
+                  'shortDescription': {
+                    'text': DesignTokenRule.descriptionOf(rule),
+                  },
+                  'fullDescription': {
+                    'text': DesignTokenRule.descriptionOf(rule),
+                  },
+                  'help': {
+                    'text': 'See ${ruleHelpUri(rule)}',
+                    'markdown':
+                        'See [${rule.code}](${ruleHelpUri(rule)}) in the '
+                        'design_token_lints documentation.',
+                  },
+                  'helpUri': ruleHelpUri(rule),
+                  'defaultConfiguration': {'level': _sarifLevel(rule)},
+                  'properties': {
+                    'tags': ['design-system', rule.category.key],
+                    'precision': 'high',
+                    'problem.severity': _sarifLevel(rule) == 'note'
+                        ? 'recommendation'
+                        : 'warning',
+                  },
+                },
+            ],
+          },
+        },
+        'results': results,
+      },
+    ],
+  };
+  return '${const JsonEncoder.withIndent('  ').convert(document)}\n';
+}
 
 String _label(DesignCategory category) => switch (category) {
   DesignCategory.color => 'colors',

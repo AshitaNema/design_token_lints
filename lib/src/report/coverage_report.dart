@@ -36,7 +36,11 @@ final class ReportFinding {
     required this.message,
     this.suggestedToken,
     this.baselined = false,
-  });
+    int? endLine,
+    int? endColumn,
+    this.correction,
+  }) : endLine = endLine ?? line,
+       endColumn = endColumn ?? column;
 
   /// The rule that produced it.
   final RuleId rule;
@@ -56,6 +60,15 @@ final class ReportFinding {
   /// Whether the finding is accepted by the baseline, so the plugin does not
   /// report it. It still counts as a raw value.
   final bool baselined;
+
+  /// The 1-based line where the finding ends.
+  final int endLine;
+
+  /// The 1-based column just after the finding.
+  final int endColumn;
+
+  /// What to do instead, for example `Try using AppColors.primary.`
+  final String? correction;
 }
 
 /// The findings of one file.

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:design_token_lints/src/cli/cli.dart';
+import 'package:design_token_lints/src/config/rule_id.dart';
+import 'package:design_token_lints/src/version.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -45,6 +47,92 @@ void main() {
       final result = await run(['coverage', '--format', 'markdown']);
       expect(result.code, ExitCodes.ok);
       expectGolden('coverage.md', result.out);
+    });
+
+    group('sarif output', () {
+      Future<Map<String, Object?>> sarif() async {
+        final result = await run(['coverage', '--format', 'sarif']);
+        expect(result.code, ExitCodes.ok);
+        return jsonDecode(result.out) as Map<String, Object?>;
+      }
+
+      Map<String, Object?> runOf(Map<String, Object?> log) =>
+          (log['runs']! as List<Object?>).single! as Map<String, Object?>;
+
+      List<Map<String, Object?>> resultsOf(Map<String, Object?> log) =>
+          (runOf(log)['results']! as List<Object?>)
+              .cast<Map<String, Object?>>();
+
+      String uriOf(Map<String, Object?> result) {
+        final location =
+            (result['locations']! as List<Object?>).single!
+                as Map<String, Object?>;
+        final physical = location['physicalLocation']! as Map<String, Object?>;
+        return (physical['artifactLocation']! as Map<String, Object?>)['uri']!
+            as String;
+      }
+
+      test('golden', () async {
+        final result = await run(['coverage', '--format', 'sarif']);
+        expectGolden(
+          'coverage.sarif',
+          result.out.replaceAll(
+            '"version": "$packageVersion"',
+            '"version": "<version>"',
+          ),
+        );
+      });
+
+      test('describes every rule and indexes results by rule', () async {
+        final log = await sarif();
+        expect(log['version'], '2.1.0');
+        final driver =
+            (runOf(log)['tool']! as Map<String, Object?>)['driver']!
+                as Map<String, Object?>;
+        expect(driver['version'], packageVersion);
+        final rules = (driver['rules']! as List<Object?>)
+            .cast<Map<String, Object?>>();
+        expect(rules.map((r) => r['id']), [
+          for (final rule in RuleId.values) rule.code,
+        ]);
+        final results = resultsOf(log);
+        expect(results, hasLength(18));
+        for (final result in results) {
+          final index = result['ruleIndex']! as int;
+          expect(rules[index]['id'], result['ruleId']);
+          expect(result['level'], isIn(['warning', 'note']));
+        }
+        final shadow = results.firstWhere(
+          (r) => r['ruleId'] == 'avoid_raw_shadow',
+        );
+        expect(shadow['level'], 'note');
+      });
+
+      test('paths are relative to the git repository root', () async {
+        Directory(p.join(p.dirname(project.root), '.git')).createSync();
+        final log = await sarif();
+        expect(
+          uriOf(resultsOf(log).first),
+          'acme/lib/screens/legacy_checkout.dart',
+        );
+      });
+
+      test('paths without a repository are relative to the root', () async {
+        final log = await sarif();
+        expect(uriOf(resultsOf(log).first), 'lib/screens/legacy_checkout.dart');
+      });
+
+      test('baselined findings are left out', () async {
+        await run(['baseline']);
+        project.write('lib/screens/new.dart', '''
+import 'package:flutter/material.dart';
+
+final a = EdgeInsets.all(16);
+''');
+        final results = resultsOf(await sarif());
+        expect(results, hasLength(1));
+        expect(uriOf(results.single), 'lib/screens/new.dart');
+      });
     });
 
     test('output goes to a file and a summary to the console', () async {
