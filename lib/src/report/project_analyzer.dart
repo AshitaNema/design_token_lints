@@ -292,13 +292,19 @@ final class ProjectAnalyzer {
     required bool baselined,
   }) {
     final location = result.lineInfo.getLocation(finding.offset);
+    final end = result.lineInfo.getLocation(finding.offset + finding.length);
+    final code = DtlCodes.of(finding.rule);
+    final arguments = finding.messageArguments;
     return ReportFinding(
       rule: finding.rule,
       line: location.lineNumber,
       column: location.columnNumber,
-      message: DtlCodes.of(
-        finding.rule,
-      ).problemMessage.replaceAll('{0}', finding.raw),
+      message: code.problemMessage.replaceAll('{0}', finding.raw),
+      correction: code.correctionMessage
+          ?.replaceAll('{0}', '${arguments[0]}')
+          .replaceAll('{1}', '${arguments[1]}'),
+      endLine: end.lineNumber,
+      endColumn: end.columnNumber,
       suggestedToken: finding.best?.reference,
       baselined: baselined,
     );

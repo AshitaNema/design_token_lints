@@ -1,0 +1,641 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "design_token_lints",
+          "version": "<version>",
+          "informationUri": "https://pub.dev/packages/design_token_lints",
+          "rules": [
+            {
+              "id": "avoid_raw_color",
+              "name": "avoid_raw_color",
+              "shortDescription": {
+                "text": "Flags raw colors so that colors come from the design system."
+              },
+              "fullDescription": {
+                "text": "Flags raw colors so that colors come from the design system."
+              },
+              "help": {
+                "text": "See https://github.com/AshitaNema/design_token_lints#avoid_raw_color",
+                "markdown": "See [avoid_raw_color](https://github.com/AshitaNema/design_token_lints#avoid_raw_color) in the design_token_lints documentation."
+              },
+              "helpUri": "https://github.com/AshitaNema/design_token_lints#avoid_raw_color",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "design-system",
+                  "color"
+                ],
+                "precision": "high",
+                "problem.severity": "warning"
+              }
+            },
+            {
+              "id": "avoid_magic_spacing",
+              "name": "avoid_magic_spacing",
+              "shortDescription": {
+                "text": "Flags numeric spacing literals so that spacing comes from the design system."
+              },
+              "fullDescription": {
+                "text": "Flags numeric spacing literals so that spacing comes from the design system."
+              },
+              "help": {
+                "text": "See https://github.com/AshitaNema/design_token_lints#avoid_magic_spacing",
+                "markdown": "See [avoid_magic_spacing](https://github.com/AshitaNema/design_token_lints#avoid_magic_spacing) in the design_token_lints documentation."
+              },
+              "helpUri": "https://github.com/AshitaNema/design_token_lints#avoid_magic_spacing",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "design-system",
+                  "spacing"
+                ],
+                "precision": "high",
+                "problem.severity": "warning"
+              }
+            },
+            {
+              "id": "avoid_raw_radius",
+              "name": "avoid_raw_radius",
+              "shortDescription": {
+                "text": "Flags numeric corner radii so that radii come from the design system."
+              },
+              "fullDescription": {
+                "text": "Flags numeric corner radii so that radii come from the design system."
+              },
+              "help": {
+                "text": "See https://github.com/AshitaNema/design_token_lints#avoid_raw_radius",
+                "markdown": "See [avoid_raw_radius](https://github.com/AshitaNema/design_token_lints#avoid_raw_radius) in the design_token_lints documentation."
+              },
+              "helpUri": "https://github.com/AshitaNema/design_token_lints#avoid_raw_radius",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "design-system",
+                  "radius"
+                ],
+                "precision": "high",
+                "problem.severity": "warning"
+              }
+            },
+            {
+              "id": "avoid_inline_text_style",
+              "name": "avoid_inline_text_style",
+              "shortDescription": {
+                "text": "Flags inline TextStyle constructors so that text styles come from the design system."
+              },
+              "fullDescription": {
+                "text": "Flags inline TextStyle constructors so that text styles come from the design system."
+              },
+              "help": {
+                "text": "See https://github.com/AshitaNema/design_token_lints#avoid_inline_text_style",
+                "markdown": "See [avoid_inline_text_style](https://github.com/AshitaNema/design_token_lints#avoid_inline_text_style) in the design_token_lints documentation."
+              },
+              "helpUri": "https://github.com/AshitaNema/design_token_lints#avoid_inline_text_style",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "design-system",
+                  "typography"
+                ],
+                "precision": "high",
+                "problem.severity": "warning"
+              }
+            },
+            {
+              "id": "avoid_raw_shadow",
+              "name": "avoid_raw_shadow",
+              "shortDescription": {
+                "text": "Flags hand-written shadows so that shadows come from the design system."
+              },
+              "fullDescription": {
+                "text": "Flags hand-written shadows so that shadows come from the design system."
+              },
+              "help": {
+                "text": "See https://github.com/AshitaNema/design_token_lints#avoid_raw_shadow",
+                "markdown": "See [avoid_raw_shadow](https://github.com/AshitaNema/design_token_lints#avoid_raw_shadow) in the design_token_lints documentation."
+              },
+              "helpUri": "https://github.com/AshitaNema/design_token_lints#avoid_raw_shadow",
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "tags": [
+                  "design-system",
+                  "shadow"
+                ],
+                "precision": "high",
+                "problem.severity": "recommendation"
+              }
+            },
+            {
+              "id": "avoid_raw_icon_size",
+              "name": "avoid_raw_icon_size",
+              "shortDescription": {
+                "text": "Flags numeric icon sizes so that icon sizes come from the design system."
+              },
+              "fullDescription": {
+                "text": "Flags numeric icon sizes so that icon sizes come from the design system."
+              },
+              "help": {
+                "text": "See https://github.com/AshitaNema/design_token_lints#avoid_raw_icon_size",
+                "markdown": "See [avoid_raw_icon_size](https://github.com/AshitaNema/design_token_lints#avoid_raw_icon_size) in the design_token_lints documentation."
+              },
+              "helpUri": "https://github.com/AshitaNema/design_token_lints#avoid_raw_icon_size",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "design-system",
+                  "icon_size"
+                ],
+                "precision": "high",
+                "problem.severity": "warning"
+              }
+            },
+            {
+              "id": "avoid_raw_elevation",
+              "name": "avoid_raw_elevation",
+              "shortDescription": {
+                "text": "Flags numeric elevations so that elevations come from the design system."
+              },
+              "fullDescription": {
+                "text": "Flags numeric elevations so that elevations come from the design system."
+              },
+              "help": {
+                "text": "See https://github.com/AshitaNema/design_token_lints#avoid_raw_elevation",
+                "markdown": "See [avoid_raw_elevation](https://github.com/AshitaNema/design_token_lints#avoid_raw_elevation) in the design_token_lints documentation."
+              },
+              "helpUri": "https://github.com/AshitaNema/design_token_lints#avoid_raw_elevation",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "design-system",
+                  "elevation"
+                ],
+                "precision": "high",
+                "problem.severity": "warning"
+              }
+            },
+            {
+              "id": "prefer_design_system_component",
+              "name": "prefer_design_system_component",
+              "shortDescription": {
+                "text": "Flags raw widgets that the design system replaces with its own."
+              },
+              "fullDescription": {
+                "text": "Flags raw widgets that the design system replaces with its own."
+              },
+              "help": {
+                "text": "See https://github.com/AshitaNema/design_token_lints#prefer_design_system_component",
+                "markdown": "See [prefer_design_system_component](https://github.com/AshitaNema/design_token_lints#prefer_design_system_component) in the design_token_lints documentation."
+              },
+              "helpUri": "https://github.com/AshitaNema/design_token_lints#prefer_design_system_component",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "design-system",
+                  "component"
+                ],
+                "precision": "high",
+                "problem.severity": "warning"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "avoid_magic_spacing",
+          "ruleIndex": 1,
+          "level": "warning",
+          "message": {
+            "text": "Magic spacing value '16'. Try using AppSpacing.md."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 5,
+                  "startColumn": 35,
+                  "endLine": 5,
+                  "endColumn": 37
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_magic_spacing",
+          "ruleIndex": 1,
+          "level": "warning",
+          "message": {
+            "text": "Magic spacing value '12'. Try using a token from AppSpacing."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 6,
+                  "startColumn": 52,
+                  "endLine": 6,
+                  "endColumn": 54
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_magic_spacing",
+          "ruleIndex": 1,
+          "level": "warning",
+          "message": {
+            "text": "Magic spacing value '20'. Try using a token from AppSpacing."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 6,
+                  "startColumn": 66,
+                  "endLine": 6,
+                  "endColumn": 68
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_raw_color",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "Raw color 'const Color(0xFF1E88E5)' bypasses the design system. Try using AppColors.primary."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 14,
+                  "endLine": 8,
+                  "endColumn": 37
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_raw_radius",
+          "ruleIndex": 2,
+          "level": "warning",
+          "message": {
+            "text": "Raw corner radius 'BorderRadius.circular(8)'. Try using AppRadius.md."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 9,
+                  "startColumn": 21,
+                  "endLine": 9,
+                  "endColumn": 45
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_raw_shadow",
+          "ruleIndex": 4,
+          "level": "note",
+          "message": {
+            "text": "Hand-written shadow bypasses the design system. Try using AppShadows.card."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 18,
+                  "endLine": 16,
+                  "endColumn": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_raw_color",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "Raw color 'Color(0x1A000000)' bypasses the design system. Try using a token from AppColors."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 18,
+                  "endLine": 12,
+                  "endColumn": 35
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_magic_spacing",
+          "ruleIndex": 1,
+          "level": "warning",
+          "message": {
+            "text": "Magic spacing value '24'. Try using AppSpacing.lg."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 18,
+                  "startColumn": 34,
+                  "endLine": 18,
+                  "endColumn": 36
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_magic_spacing",
+          "ruleIndex": 1,
+          "level": "warning",
+          "message": {
+            "text": "Magic spacing value '13'. Try using a token from AppSpacing."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 18,
+                  "startColumn": 46,
+                  "endLine": 18,
+                  "endColumn": 48
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "prefer_design_system_component",
+          "ruleIndex": 7,
+          "level": "warning",
+          "message": {
+            "text": "'Text' has a design-system replacement. Try using AppText."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 20,
+                  "startColumn": 9,
+                  "endLine": 20,
+                  "endColumn": 13
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_inline_text_style",
+          "ruleIndex": 3,
+          "level": "warning",
+          "message": {
+            "text": "Inline TextStyle bypasses the design system. Try using AppTypography.title."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 22,
+                  "startColumn": 12,
+                  "endLine": 22,
+                  "endColumn": 64
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "prefer_design_system_component",
+          "ruleIndex": 7,
+          "level": "warning",
+          "message": {
+            "text": "'Text' has a design-system replacement. Try using AppText."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 24,
+                  "startColumn": 9,
+                  "endLine": 24,
+                  "endColumn": 13
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_inline_text_style",
+          "ruleIndex": 3,
+          "level": "warning",
+          "message": {
+            "text": "Inline TextStyle bypasses the design system. Try using a token from AppTypography."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 24,
+                  "startColumn": 32,
+                  "endLine": 24,
+                  "endColumn": 74
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_raw_color",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "Raw color 'Colors.red' bypasses the design system. Try using a token from AppColors."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 24,
+                  "startColumn": 63,
+                  "endLine": 24,
+                  "endColumn": 73
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "prefer_design_system_component",
+          "ruleIndex": 7,
+          "level": "warning",
+          "message": {
+            "text": "'ElevatedButton' has a design-system replacement. Try using AppButton."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 25,
+                  "startColumn": 3,
+                  "endLine": 25,
+                  "endColumn": 17
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_magic_spacing",
+          "ruleIndex": 1,
+          "level": "warning",
+          "message": {
+            "text": "Magic spacing value '3'. Try using a token from AppSpacing."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 27,
+                  "startColumn": 42,
+                  "endLine": 27,
+                  "endColumn": 43
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_magic_spacing",
+          "ruleIndex": 1,
+          "level": "warning",
+          "message": {
+            "text": "Magic spacing value '5'. Try using a token from AppSpacing."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 27,
+                  "startColumn": 50,
+                  "endLine": 27,
+                  "endColumn": 51
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "avoid_raw_radius",
+          "ruleIndex": 2,
+          "level": "warning",
+          "message": {
+            "text": "Raw corner radius 'BorderRadius.circular(10)'. Try using a token from AppRadius."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/screens/legacy_checkout.dart"
+                },
+                "region": {
+                  "startLine": 29,
+                  "startColumn": 47,
+                  "endLine": 29,
+                  "endColumn": 72
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

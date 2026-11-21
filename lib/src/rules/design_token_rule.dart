@@ -94,7 +94,10 @@ final class DesignTokenRule extends AnalysisRule {
   /// Creates the rule for [id].
   DesignTokenRule(this.id, {ConfigLoader? loader})
     : _loader = loader ?? ConfigLoader.shared,
-      super(name: id.code, description: _descriptions[id]!);
+      super(name: id.code, description: descriptionOf(id));
+
+  /// A one-sentence description of [rule].
+  static String descriptionOf(RuleId rule) => _descriptions[rule]!;
 
   static const _descriptions = {
     RuleId.avoidRawColor:

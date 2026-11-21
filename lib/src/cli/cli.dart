@@ -219,7 +219,13 @@ Future<int> _coverage(
     err.writeln('${issue.severity.name}: ${issue.message}');
   }
 
-  final rendered = renderReport(report, format);
+  final rendered = renderReport(
+    report,
+    format,
+    pathPrefix: format == ReportFormat.sarif
+        ? repositoryPathPrefix(provider, root)
+        : '',
+  );
   final outputPath = command['output'] as String?;
   if (outputPath == null) {
     out.write(rendered);
@@ -400,6 +406,25 @@ Future<int> _baseline(
       'and run the command again after fixing some to shrink it.',
     );
   return ExitCodes.ok;
+}
+
+/// The path of [root] inside its git repository, with `/` separators and a
+/// trailing `/`, or `''` when [root] is the repository root or is not in a
+/// repository.
+///
+/// GitHub code scanning reads SARIF paths relative to the repository root, so
+/// a package in `packages/app` reports `packages/app/lib/…`.
+String repositoryPathPrefix(ResourceProvider provider, String root) {
+  final context = provider.pathContext;
+  for (var folder = provider.getFolder(root); ; folder = folder.parent) {
+    if (folder.getChild('.git').exists) {
+      final relative = context.relative(root, from: folder.path);
+      return relative == '.'
+          ? ''
+          : '${p.posix.joinAll(context.split(relative))}/';
+    }
+    if (folder.isRoot) return '';
+  }
 }
 
 /// [raw] on one line, shortened to 40 characters.

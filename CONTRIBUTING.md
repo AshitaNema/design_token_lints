@@ -65,7 +65,8 @@ pin `analysis_server_plugin`, `analyzer`, `analyzer_plugin` and
 
 ## Releasing
 
-1. Update the version in `pubspec.yaml` and the entry in `CHANGELOG.md`.
+1. Update the version in `pubspec.yaml` and in `lib/src/version.dart` (a test
+   checks that they match), and the entry in `CHANGELOG.md`.
 2. Merge to `main` once CI is green.
 3. Tag the commit `vX.Y.Z` and push the tag. The `Publish` workflow publishes
    it to pub.dev with GitHub OIDC.

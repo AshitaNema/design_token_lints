@@ -1,3 +1,9 @@
+## Unreleased
+
+- `coverage --format sarif` writes a SARIF 2.1.0 log for GitHub code scanning,
+  with paths relative to the git repository root and without baselined
+  findings. The README has a workflow that uploads it.
+
 ## 0.3.0
 
 Reach: more of a real design system.

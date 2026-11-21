@@ -522,7 +522,7 @@ Install the command line tool globally, not as a dev dependency. A dev
 dependency would add the analyzer's version constraints to your project.
 
 ```text
-design_token_lints coverage [path] [--format console|json|markdown]
+design_token_lints coverage [path] [--format console|json|markdown|sarif]
                             [--output file] [--fail-under 80]
                             [--category color,spacing,radius,typography,shadow,icon_size,elevation,component]
 design_token_lints fix [path] [--dry-run] [--rule rule,...]
@@ -532,7 +532,7 @@ design_token_lints check-config [path]
 
 | Option | Meaning |
 | --- | --- |
-| `--format` | `console` (default), `json` (with `"schemaVersion": 1`), or `markdown` |
+| `--format` | `console` (default), `json` (with `"schemaVersion": 1`), `markdown`, or `sarif` (for [GitHub code scanning](#github-code-scanning)) |
 | `--output` | write the report to a file; a one-line summary goes to the console |
 | `--fail-under N` | exit with code 1 if overall coverage is below N percent |
 | `--category` | measure only these categories |
@@ -587,6 +587,42 @@ Run the plugin's diagnostics in CI with `dart analyze`:
 ```yaml
 - run: dart analyze
 ```
+
+### GitHub code scanning
+
+`--format sarif` writes a [SARIF 2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html)
+log, the format GitHub code scanning reads. Uploaded, every raw value shows up
+in the repository's **Security → Code scanning** tab and as an annotation on
+the changed lines of pull requests:
+
+```yaml
+name: Design system
+on: [push, pull_request]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+      - run: flutter pub get
+      - run: dart pub global activate design_token_lints
+      - run: design_token_lints coverage --format sarif --output design-tokens.sarif
+      - uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: design-tokens.sarif
+          category: design-tokens
+```
+
+File paths are written relative to the git repository root, so a package in a
+subdirectory of a monorepo is annotated on the right files. Values accepted by
+a [baseline](#baseline-for-existing-apps) are left out, as they are in the IDE.
+`avoid_raw_shadow` is reported as a note, the other rules as warnings. For
+private repositories, code scanning needs GitHub Code Security.
 
 ## Limitations
 
