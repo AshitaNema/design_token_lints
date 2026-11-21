@@ -1,5 +1,8 @@
 ## Unreleased
 
+- A JSON schema for `design_token_lints.yaml`
+  (`doc/design_token_lints.schema.json`): with a `# yaml-language-server`
+  line, editors complete keys and flag mistakes as you type.
 - `coverage --format sarif` writes a SARIF 2.1.0 log for GitHub code scanning,
   with paths relative to the git repository root and without baselined
   findings. The README has a workflow that uploads it.

@@ -1,0 +1,271 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/AshitaNema/design_token_lints/main/doc/design_token_lints.schema.json",
+  "title": "design_token_lints configuration",
+  "description": "The design_token_lints.yaml file: where the design system lives, its token classes, and what the rules allow. https://github.com/AshitaNema/design_token_lints#configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "design_system": {
+      "type": "object",
+      "description": "Files and packages where raw values legitimately live.",
+      "additionalProperties": false,
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Globs, relative to this file, of design-system files. Example: lib/design_system/**"
+        },
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Package names whose files are exempt (pub workspaces)."
+        }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "description": "The token class of each category.",
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "$ref": "#/definitions/tokenSource"
+        },
+        "spacing": {
+          "$ref": "#/definitions/tokenSource"
+        },
+        "radius": {
+          "$ref": "#/definitions/tokenSource"
+        },
+        "typography": {
+          "$ref": "#/definitions/tokenSource"
+        },
+        "shadow": {
+          "$ref": "#/definitions/tokenSource"
+        },
+        "icon_size": {
+          "$ref": "#/definitions/tokenSource"
+        },
+        "elevation": {
+          "$ref": "#/definitions/tokenSource"
+        }
+      }
+    },
+    "allow": {
+      "type": "object",
+      "description": "Values that are always fine.",
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "type": "array",
+          "description": "Colors.<name> members or ARGB values.",
+          "items": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(Colors\\.[A-Za-z0-9_.\\[\\]]+|0[xX][0-9A-Fa-f]{1,8}|[0-9]+)$"
+              }
+            ]
+          }
+        },
+        "spacing": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Spacing literals that are always allowed. 0 always is."
+        },
+        "radius": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Radius literals that are always allowed."
+        },
+        "icon_size": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Icon size literals that are always allowed."
+        },
+        "elevation": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Elevation literals that are always allowed. 0 always is."
+        }
+      }
+    },
+    "matching": {
+      "type": "object",
+      "description": "When to offer nearest-token fixes. 0 means exact matches only.",
+      "additionalProperties": false,
+      "properties": {
+        "spacing_tolerance": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Largest spacing difference, in logical pixels, offered as a nearest token."
+        },
+        "radius_tolerance": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Largest radius difference, in logical pixels, offered as a nearest token."
+        },
+        "icon_size_tolerance": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Largest icon size difference, in logical pixels, offered as a nearest token."
+        },
+        "elevation_tolerance": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Largest elevation difference offered as a nearest token."
+        },
+        "color_delta_e": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Largest CIEDE2000 distance offered as a nearest color; around 2 is barely noticeable."
+        }
+      }
+    },
+    "components": {
+      "type": "object",
+      "description": "Raw widgets and the design-system widgets that replace them, keyed by the raw widget's class name.",
+      "additionalProperties": {
+        "$ref": "#/definitions/component"
+      }
+    },
+    "exclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Globs of files no rule applies to. Generated files are skipped without listing them."
+    },
+    "rules": {
+      "type": "object",
+      "description": "Options for a single rule.",
+      "additionalProperties": false,
+      "properties": {
+        "avoid_raw_color": {
+          "$ref": "#/definitions/ruleOptions",
+          "description": "https://github.com/AshitaNema/design_token_lints#avoid_raw_color"
+        },
+        "avoid_magic_spacing": {
+          "$ref": "#/definitions/ruleOptions",
+          "description": "https://github.com/AshitaNema/design_token_lints#avoid_magic_spacing"
+        },
+        "avoid_raw_radius": {
+          "$ref": "#/definitions/ruleOptions",
+          "description": "https://github.com/AshitaNema/design_token_lints#avoid_raw_radius"
+        },
+        "avoid_inline_text_style": {
+          "$ref": "#/definitions/ruleOptions",
+          "description": "https://github.com/AshitaNema/design_token_lints#avoid_inline_text_style"
+        },
+        "avoid_raw_shadow": {
+          "$ref": "#/definitions/ruleOptions",
+          "description": "https://github.com/AshitaNema/design_token_lints#avoid_raw_shadow"
+        },
+        "avoid_raw_icon_size": {
+          "$ref": "#/definitions/ruleOptions",
+          "description": "https://github.com/AshitaNema/design_token_lints#avoid_raw_icon_size"
+        },
+        "avoid_raw_elevation": {
+          "$ref": "#/definitions/ruleOptions",
+          "description": "https://github.com/AshitaNema/design_token_lints#avoid_raw_elevation"
+        },
+        "prefer_design_system_component": {
+          "$ref": "#/definitions/ruleOptions",
+          "description": "https://github.com/AshitaNema/design_token_lints#prefer_design_system_component"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "tokenSource": {
+      "type": "object",
+      "required": [
+        "class",
+        "file"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "class": {
+          "type": "string",
+          "description": "The token class, for example AppColors."
+        },
+        "file": {
+          "type": "string",
+          "description": "A path relative to this file, or a package: URI."
+        },
+        "instance": {
+          "type": "string",
+          "description": "For a ThemeExtension: the static const instance whose constructor arguments are the tokens, for example light. https://github.com/AshitaNema/design_token_lints#themeextension-tokens"
+        },
+        "access": {
+          "type": "string",
+          "pattern": "\\{name\\}",
+          "description": "With instance: how code reads a token, with {name} for the field. Default: Theme.of(context).extension<Class>()!.{name}"
+        },
+        "import": {
+          "type": "string",
+          "description": "With instance: the library a fix imports, instead of the token file."
+        }
+      },
+      "dependencies": {
+        "access": [
+          "instance"
+        ],
+        "import": [
+          "instance"
+        ]
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": [
+        "replacement"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "replacement": {
+          "type": "string",
+          "description": "The design-system widget, for example AppButton."
+        },
+        "import": {
+          "type": "string",
+          "description": "The library that declares the replacement, added by the fix."
+        }
+      }
+    },
+    "ruleOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Globs of files this rule skips."
+        }
+      }
+    }
+  }
+}
