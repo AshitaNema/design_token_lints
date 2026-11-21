@@ -31,6 +31,7 @@ Watch: [quick fixes in VS Code](https://github.com/AshitaNema/design_token_lints
 [Example app](#example-app) · [What it reports](#what-it-reports) ·
 [Configuration](#configuration) · [Rules](#rules) · [Fix everything](#fix-everything) ·
 [Baseline](#baseline-for-existing-apps) ·
+[Design tokens from Figma](#design-tokens-from-figma) ·
 [Coverage](#coverage) ·
 [Limitations](#limitations) · [How this compares](#how-this-compares) ·
 [Roadmap](#roadmap)
@@ -508,6 +509,61 @@ one, so the design system can only gain ground.
   `design_token_lints fix`), run `design_token_lints baseline` again.
   Running it on a subdirectory rewrites only that part of the file.
 
+## Design tokens from Figma
+
+Design tools export tokens as JSON in the
+[Design Tokens Format Module 2025.10](https://www.designtokens.org/tr/2025.10/format/),
+the format of the Design Tokens Community Group (for example from Figma
+variables or Tokens Studio). `design_token_lints check-tokens` compares such a
+file with your Dart tokens, so you know when code and design have drifted
+apart:
+
+```yaml
+design_tokens:
+  file: design/tokens.json
+  map:
+    color:   { group: color }    # color.brand.primary → AppColors.brandPrimary
+    spacing: { group: space, names: { "4": xs, "8": sm } }
+```
+
+```text
+$ design_token_lints check-tokens
+Compared design/tokens.json with the Dart tokens: 13 match, 2 differ, 1 missing in Dart.
+
+Different values:
+  AppColors.danger  design 0xFFD42E2E (color.danger), Dart 0xFFD32F2F
+  AppSpacing.lg  design 16 (space.lg), Dart 24
+
+Missing in Dart:
+  AppColors.warning  for color.warning (0xFFFF9900)
+
+Not compared:
+  space.xl: value is in "rem"; only px dimensions can be compared
+```
+
+Each category under `map` is compared with one group of the file, using the
+Dart class configured under `tokens`. A token's Dart name is its path in the
+group in camelCase (`brand.primary` and `brand-primary` become
+`brandPrimary`); `names` gives the Dart name where that does not work, such as
+a token called `4`.
+
+| Category | Design token `$type` | Compared |
+| --- | --- | --- |
+| `color` | `color` | `srgb` components and alpha, or the `hex` fallback of another color space; `#RRGGBB` and `#RRGGBBAA` strings are accepted too |
+| `spacing`, `radius`, `icon_size`, `elevation` | `dimension`, `number` | `px` dimensions and numbers |
+| `typography` | `typography` | `fontSize`, `fontWeight` (numbers and names such as `bold`), `lineHeight`, `letterSpacing` |
+| `shadow` | `shadow` | each layer's color, offset, blur and spread |
+
+`{group.token}` aliases and `$ref` JSON pointers are followed, also in chains,
+and `$type` is inherited from groups. Tokens that cannot be compared (a `rem`
+dimension, a color space without `hex`, an `inset` shadow, a broken
+reference) are listed with the reason, not guessed. `$extends` is not
+supported yet.
+
+The command exits with `0` when the files agree, `1` when they have drifted,
+and `2` on a configuration or file problem, so CI can require that code and
+design agree. `--format json` writes the comparison as JSON.
+
 ## Coverage
 
 ```sh
@@ -541,6 +597,7 @@ design_token_lints coverage [path] [--format console|json|markdown|sarif]
                             [--category color,spacing,radius,typography,shadow,icon_size,elevation,component]
 design_token_lints fix [path] [--dry-run] [--rule rule,...]
 design_token_lints baseline [path]
+design_token_lints check-tokens [path] [--format console|json]
 design_token_lints check-config [path]
 ```
 
@@ -692,10 +749,10 @@ ground and run side by side with this plugin in `analysis_options.yaml`.
 
 ## Roadmap
 
-- **More token sources:** importing tokens from Figma, Tokens Studio and the
-  W3C Design Tokens format.
+- **Design tokens:** `rem` dimensions (with a configured base size), more
+  color spaces, `$extends`, and the older Tokens Studio format in
+  `check-tokens`.
 - **More categories:** motion (durations and curves) and opacity tokens.
-- **CI output:** SARIF from the coverage command.
 - **Plugin platform:** per-rule options in `analysis_options.yaml` once the SDK
   supports them ([dart-lang/sdk#63098](https://github.com/dart-lang/sdk/issues/63098)),
   and `dart fix` support once plugin fixes allow it.

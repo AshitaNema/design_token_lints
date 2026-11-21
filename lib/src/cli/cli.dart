@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:analyzer/file_system/file_system.dart' show ResourceProvider;
@@ -7,6 +8,8 @@ import 'package:path/path.dart' as p;
 
 import '../config/config.dart';
 import '../config/rule_id.dart';
+import '../design_tokens/drift.dart';
+import '../design_tokens/dtcg.dart';
 import '../fixes/bulk_fixer.dart';
 import '../report/baseline_writer.dart';
 import '../report/project_analyzer.dart';
@@ -18,8 +21,8 @@ abstract final class ExitCodes {
   /// Success.
   static const int ok = 0;
 
-  /// Coverage is below `--fail-under`, or `fix --dry-run` found something
-  /// to fix.
+  /// Coverage is below `--fail-under`, `fix --dry-run` found something to
+  /// fix, or `check-tokens` found drift.
   static const int belowThreshold = 1;
 
   /// Invalid usage, or the configuration has errors.
@@ -90,6 +93,13 @@ Future<int> runCli(
     'coverage' => _coverage(command, root, resources, stdoutSink, stderrSink),
     'fix' => _fix(command, root, resources, stdoutSink, stderrSink),
     'baseline' => _baseline(root, resources, stdoutSink, stderrSink),
+    'check-tokens' => _checkTokens(
+      command,
+      root,
+      resources,
+      stdoutSink,
+      stderrSink,
+    ),
     _ => _checkConfig(root, resources, stdoutSink, stderrSink),
   };
 }
@@ -136,6 +146,15 @@ ArgParser _buildParser() {
     )
     ..addFlag('help', abbr: 'h', negatable: false);
   parser.addCommand('baseline').addFlag('help', abbr: 'h', negatable: false);
+  parser.addCommand('check-tokens')
+    ..addOption(
+      'format',
+      abbr: 'f',
+      allowed: ['console', 'json'],
+      defaultsTo: 'console',
+      help: 'The output format.',
+    )
+    ..addFlag('help', abbr: 'h', negatable: false);
   parser
       .addCommand('check-config')
       .addFlag('help', abbr: 'h', negatable: false);
@@ -151,6 +170,7 @@ String _usage(ArgParser parser) =>
     '  coverage       Measure how much of the UI uses the design system.\n'
     '  fix            Replace raw values that match exactly one token.\n'
     '  baseline       Accept the current raw values; report only new ones.\n'
+    '  check-tokens   Compare the Dart tokens with a design tokens file.\n'
     '  check-config   Validate the configuration and print the tokens found.\n'
     '\n'
     'Run "design_token_lints <command> --help" for the options of a command.\n';
@@ -425,6 +445,143 @@ String repositoryPathPrefix(ResourceProvider provider, String root) {
     }
     if (folder.isRoot) return '';
   }
+}
+
+Future<int> _checkTokens(
+  ArgResults command,
+  String root,
+  ResourceProvider provider,
+  StringSink out,
+  StringSink err,
+) async {
+  final project = ProjectAnalyzer(
+    provider,
+  ).projectFor(provider.getFolder(root));
+  if (project == null || !project.config.isPresent) {
+    err.writeln(
+      'No design_token_lints configuration found for "$root". Add a '
+      '`design_token_lints:` section to analysis_options.yaml or create '
+      'design_token_lints.yaml.',
+    );
+    return ExitCodes.usage;
+  }
+  final source = project.config.designTokens;
+  if (source == null) {
+    err.writeln(
+      'The configuration has no design_tokens section, so there is nothing '
+      'to compare. See "design_tokens" in the README.',
+    );
+    return ExitCodes.usage;
+  }
+  final errors = [
+    for (final issue in project.issues)
+      if (issue.severity == ConfigIssueSeverity.error) issue,
+  ];
+  for (final category in source.groups.keys) {
+    if (!project.index.hasCategory(category)) {
+      errors.add(
+        ConfigIssue(
+          ConfigIssueSeverity.error,
+          'design_tokens.map.${category.key}: tokens.${category.key} is not '
+          'configured or its class was not found.',
+        ),
+      );
+    }
+  }
+  final context = provider.pathContext;
+  final file = provider.getFile(
+    context.normalize(context.join(project.config.rootPath, source.file)),
+  );
+  if (!file.exists) {
+    errors.add(
+      ConfigIssue(
+        ConfigIssueSeverity.error,
+        'design_tokens: file "${source.file}" was not found.',
+      ),
+    );
+  }
+  if (errors.isNotEmpty) {
+    for (final issue in errors) {
+      err.writeln('${issue.severity.name}: ${issue.message}');
+    }
+    return ExitCodes.usage;
+  }
+
+  final tokens = DesignTokenFile.parse(file.readAsStringSync());
+  final fatal = [
+    for (final problem in tokens.problems)
+      if (problem.path.isEmpty) problem,
+  ];
+  if (fatal.isNotEmpty) {
+    for (final problem in fatal) {
+      err.writeln('error: ${source.file}: ${problem.message}');
+    }
+    return ExitCodes.usage;
+  }
+  final report = compareDesignTokens(tokens, project.index, source.groups);
+  final skipped = [...tokens.problems, ...report.skipped];
+
+  if (command['format'] == 'json') {
+    Map<String, Object?> item(DriftItem i) => {
+      'category': i.category.key,
+      'designPath': i.designPath,
+      'dartReference': i.dartReference,
+      'designValue': i.designValue,
+      'dartValue': i.dartValue,
+    };
+    out.writeln(
+      const JsonEncoder.withIndent('  ').convert({
+        'schemaVersion': 1,
+        'file': source.file,
+        'inSync': report.inSync,
+        'matching': report.matching,
+        'different': [for (final i in report.different) item(i)],
+        'missingInDart': [for (final i in report.missingInDart) item(i)],
+        'missingInDesign': [for (final i in report.missingInDesign) item(i)],
+        'skipped': [
+          for (final p in skipped) {'path': p.path, 'reason': p.message},
+        ],
+      }),
+    );
+  } else {
+    final counts = [
+      '${report.matching} match',
+      if (report.different.isNotEmpty) '${report.different.length} differ',
+      if (report.missingInDart.isNotEmpty)
+        '${report.missingInDart.length} missing in Dart',
+      if (report.missingInDesign.isNotEmpty)
+        '${report.missingInDesign.length} missing in the design file',
+    ];
+    out.writeln(
+      'Compared ${source.file} with the Dart tokens: ${counts.join(', ')}.',
+    );
+    void section(String heading, Iterable<String> lines) {
+      final list = lines.toList();
+      if (list.isEmpty) return;
+      out
+        ..writeln()
+        ..writeln(heading);
+      for (final line in list) {
+        out.writeln('  $line');
+      }
+    }
+
+    section('Different values:', [
+      for (final i in report.different)
+        '${i.dartReference}  design ${i.designValue} '
+            '(${i.designPath}), Dart ${i.dartValue}',
+    ]);
+    section('Missing in Dart:', [
+      for (final i in report.missingInDart)
+        '${i.dartReference}  for ${i.designPath} (${i.designValue})',
+    ]);
+    section('Missing in the design file:', [
+      for (final i in report.missingInDesign)
+        '${i.dartReference} (${i.dartValue})',
+    ]);
+    section('Not compared:', [for (final p in skipped) '$p']);
+  }
+  return report.inSync ? ExitCodes.ok : ExitCodes.belowThreshold;
 }
 
 /// [raw] on one line, shortened to 40 characters.

@@ -1,5 +1,9 @@
 ## Unreleased
 
+- New `design_token_lints check-tokens` command and `design_tokens:` section:
+  compares the Dart tokens with a design tokens file in the Design Tokens
+  Format Module 2025.10 (as exported from Figma or Tokens Studio) and lists
+  values that differ and tokens missing on either side. Exit code 1 on drift.
 - A JSON schema for `design_token_lints.yaml`
   (`doc/design_token_lints.schema.json`): with a `# yaml-language-server`
   line, editors complete keys and flag mistakes as you type.

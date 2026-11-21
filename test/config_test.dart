@@ -213,6 +213,61 @@ tokens:
       });
     });
 
+    group('design_tokens', () {
+      test('reads the file and the groups', () {
+        final config = parse('''
+design_tokens:
+  file: design/tokens.json
+  map:
+    color: { group: color.brand }
+    spacing: { group: space, names: { "4": xs, "8": sm } }
+''');
+        expect(config.issues, isEmpty);
+        final source = config.designTokens!;
+        expect(source.file, 'design/tokens.json');
+        expect(source.groups.keys, [
+          DesignCategory.color,
+          DesignCategory.spacing,
+        ]);
+        expect(source.groups[DesignCategory.color]!.group, 'color.brand');
+        expect(source.groups[DesignCategory.spacing]!.names, {
+          '4': 'xs',
+          '8': 'sm',
+        });
+      });
+
+      test('absent by default', () {
+        expect(parse('exclude: []').designTokens, isNull);
+      });
+
+      test('problems', () {
+        expect(
+          parse('design_tokens: { map: {} }').issues.single.message,
+          contains('"file" must be a string'),
+        );
+        final config = parse('''
+design_tokens:
+  file: t.json
+  extra: 1
+  map:
+    motion: { group: m }
+    color: { colour: x }
+    spacing: { group: s, names: { "4": 4 } }
+''');
+        expect(config.issues.map((i) => i.message), [
+          'design_tokens: unknown key "extra".',
+          'design_tokens.map.motion: unknown category.',
+          'design_tokens.map.color: unknown key "colour".',
+          'design_tokens.map.color: "group" must be a string.',
+          'design_tokens.map.spacing.names.4: "4" is not a string.',
+        ]);
+        expect(
+          parse('design_tokens: { file: t.json }').issues.single.message,
+          contains('names no category'),
+        );
+      });
+    });
+
     test('warns about unknown token categories', () {
       final config = parse('''
 tokens:

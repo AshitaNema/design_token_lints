@@ -18,7 +18,14 @@ abstract final class ConfigKeys {
     'components',
     'exclude',
     'rules',
+    'design_tokens',
   };
+
+  /// Keys of `design_tokens`.
+  static const designTokens = {'file', 'map'};
+
+  /// Keys of each entry under `design_tokens.map`.
+  static const designTokenGroup = {'group', 'names'};
 
   /// Keys of `design_system`.
   static const designSystem = {'paths', 'packages'};
@@ -117,6 +124,33 @@ class TokenSource {
       'Theme.of(context).extension<$className>()!.{name}';
 }
 
+/// How a category of Dart tokens maps to a group of a design tokens file.
+final class DesignTokenGroup {
+  /// Creates a mapping.
+  const DesignTokenGroup({required this.group, this.names = const {}});
+
+  /// The dotted path of the group, for example `color` or `color.brand`.
+  final String group;
+
+  /// Dart member names for design token paths (relative to [group]) whose
+  /// camelCase name is not wanted or not a valid identifier, for example
+  /// `{'4': 'xs'}`.
+  final Map<String, String> names;
+}
+
+/// The design tokens file to compare the Dart tokens with
+/// (`design_token_lints check-tokens`).
+class DesignTokensSource {
+  /// Creates a source.
+  const DesignTokensSource({required this.file, required this.groups});
+
+  /// A path relative to the configuration directory.
+  final String file;
+
+  /// The group of the file each category is compared with.
+  final Map<DesignCategory, DesignTokenGroup> groups;
+}
+
 /// A raw widget and the design-system widget that replaces it.
 class ComponentReplacement {
   /// Creates a replacement.
@@ -152,6 +186,7 @@ class DtlConfig {
     this.components = const {},
     this.exclude = const [],
     this.ruleExcludes = const {},
+    this.designTokens,
   }) : _designSystemGlobs = _globs(designSystemPaths),
        _excludeGlobs = _globs(exclude),
        _ruleGlobs = {
@@ -258,6 +293,7 @@ class DtlConfig {
       components: _readComponents(reader, yaml['components']),
       exclude: reader.strings(yaml['exclude'], 'exclude'),
       ruleExcludes: _readRuleExcludes(reader, yaml['rules']),
+      designTokens: _readDesignTokens(reader, yaml['design_tokens']),
     );
   }
 
@@ -321,6 +357,9 @@ class DtlConfig {
 
   /// Globs of files a single rule skips.
   final Map<RuleId, List<String>> ruleExcludes;
+
+  /// The design tokens file to compare with, if any.
+  final DesignTokensSource? designTokens;
 
   final List<Glob> _designSystemGlobs;
   final List<Glob> _excludeGlobs;
@@ -420,6 +459,49 @@ class DtlConfig {
       );
     }
     return result;
+  }
+
+  static DesignTokensSource? _readDesignTokens(_Reader reader, Object? raw) {
+    if (raw == null) return null;
+    final section = reader.map(raw, 'design_tokens');
+    reader.unknownKeys(section, ConfigKeys.designTokens, 'design_tokens');
+    final file = section['file'];
+    if (file is! String) {
+      reader.error('design_tokens: "file" must be a string.');
+      return null;
+    }
+    final groups = <DesignCategory, DesignTokenGroup>{};
+    for (final entry
+        in reader.map(section['map'], 'design_tokens.map').entries) {
+      final key = '${entry.key}';
+      final at = 'design_tokens.map.$key';
+      final category = DesignCategory.fromKey(key);
+      if (category == null || !category.isToken) {
+        reader.warn('$at: unknown category.');
+        continue;
+      }
+      final mapping = reader.map(entry.value, at);
+      reader.unknownKeys(mapping, ConfigKeys.designTokenGroup, at);
+      final group = mapping['group'];
+      if (group is! String) {
+        reader.error('$at: "group" must be a string.');
+        continue;
+      }
+      final names = <String, String>{};
+      for (final MapEntry(key: path, value: name)
+          in reader.map(mapping['names'], '$at.names').entries) {
+        if (name is String) {
+          names['$path'] = name;
+        } else {
+          reader.warn('$at.names.$path: "$name" is not a string.');
+        }
+      }
+      groups[category] = DesignTokenGroup(group: group, names: names);
+    }
+    if (groups.isEmpty) {
+      reader.warn('design_tokens: "map" names no category to compare.');
+    }
+    return DesignTokensSource(file: file, groups: groups);
   }
 
   static Map<String, ComponentReplacement> _readComponents(
