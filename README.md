@@ -193,6 +193,20 @@ design_token_lints:
     avoid_magic_spacing: { exclude: [lib/legacy/**] }
 ```
 
+### Editor support
+
+A JSON schema describes `design_token_lints.yaml`, so editors that use the
+YAML language server (for example VS Code with the Red Hat YAML extension)
+complete keys, show their documentation on hover, and flag typos and wrong
+values as you type. Put this line at the top of the file:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/AshitaNema/design_token_lints/main/doc/design_token_lints.schema.json
+```
+
+The schema covers the standalone file only, not a `design_token_lints:`
+section inside `analysis_options.yaml`.
+
 ### How tokens are found
 
 Each configured token file is parsed, without resolution and without a build

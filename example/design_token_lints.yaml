@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/AshitaNema/design_token_lints/main/doc/design_token_lints.schema.json
 # The design system of acme_shop. See the package README for every option.
 design_system:
   paths: [lib/design_system/**]

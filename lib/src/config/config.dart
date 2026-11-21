@@ -4,6 +4,47 @@ import 'package:yaml/yaml.dart';
 
 import 'rule_id.dart';
 
+/// The keys the configuration accepts, section by section.
+///
+/// The JSON schema in `doc/design_token_lints.schema.json` describes the same
+/// keys; a test checks that the two agree.
+abstract final class ConfigKeys {
+  /// Keys of the `design_token_lints` section itself.
+  static const topLevel = {
+    'design_system',
+    'tokens',
+    'allow',
+    'matching',
+    'components',
+    'exclude',
+    'rules',
+  };
+
+  /// Keys of `design_system`.
+  static const designSystem = {'paths', 'packages'};
+
+  /// Keys of each entry under `tokens`.
+  static const tokenSource = {'class', 'file', 'instance', 'access', 'import'};
+
+  /// Keys of `allow`.
+  static const allow = {'color', 'spacing', 'radius', 'icon_size', 'elevation'};
+
+  /// Keys of `matching`.
+  static const matching = {
+    'spacing_tolerance',
+    'radius_tolerance',
+    'icon_size_tolerance',
+    'elevation_tolerance',
+    'color_delta_e',
+  };
+
+  /// Keys of each entry under `components`.
+  static const component = {'replacement', 'import'};
+
+  /// Keys of each entry under `rules`.
+  static const rule = {'exclude'};
+}
+
 /// Where a [DtlConfig] was read from.
 enum ConfigSource {
   /// No configuration was found.
@@ -148,39 +189,15 @@ class DtlConfig {
       return DtlConfig.none(rootPath: rootPath, issues: issues);
     }
     final reader = _Reader(issues);
-    const known = {
-      'design_system',
-      'tokens',
-      'allow',
-      'matching',
-      'components',
-      'exclude',
-      'rules',
-    };
-    reader.unknownKeys(yaml, known, 'design_token_lints');
+    reader.unknownKeys(yaml, ConfigKeys.topLevel, 'design_token_lints');
 
     final designSystem = reader.map(yaml['design_system'], 'design_system');
-    reader.unknownKeys(designSystem, const {
-      'paths',
-      'packages',
-    }, 'design_system');
+    reader.unknownKeys(designSystem, ConfigKeys.designSystem, 'design_system');
     final tokens = _readTokens(reader, yaml['tokens']);
     final allow = reader.map(yaml['allow'], 'allow');
-    reader.unknownKeys(allow, const {
-      'color',
-      'spacing',
-      'radius',
-      'icon_size',
-      'elevation',
-    }, 'allow');
+    reader.unknownKeys(allow, ConfigKeys.allow, 'allow');
     final matching = reader.map(yaml['matching'], 'matching');
-    reader.unknownKeys(matching, const {
-      'spacing_tolerance',
-      'radius_tolerance',
-      'icon_size_tolerance',
-      'elevation_tolerance',
-      'color_delta_e',
-    }, 'matching');
+    reader.unknownKeys(matching, ConfigKeys.matching, 'matching');
 
     final colorValues = <int>{};
     final colorNames = <String>{};
@@ -369,13 +386,7 @@ class DtlConfig {
         reader.error('tokens.$key: both "class" and "file" must be strings.');
         continue;
       }
-      reader.unknownKeys(source, const {
-        'class',
-        'file',
-        'instance',
-        'access',
-        'import',
-      }, 'tokens.$key');
+      reader.unknownKeys(source, ConfigKeys.tokenSource, 'tokens.$key');
       final instance = source['instance'];
       final access = source['access'];
       final import = source['import'];
@@ -430,10 +441,7 @@ class DtlConfig {
         reader.error('components.$name: "import" must be a string.');
         continue;
       }
-      reader.unknownKeys(value, const {
-        'replacement',
-        'import',
-      }, 'components.$name');
+      reader.unknownKeys(value, ConfigKeys.component, 'components.$name');
       result[name] = ComponentReplacement(
         replacement: replacement,
         import: import as String?,
@@ -456,7 +464,7 @@ class DtlConfig {
         continue;
       }
       final options = reader.map(entry.value, 'rules.$code');
-      reader.unknownKeys(options, const {'exclude'}, 'rules.$code');
+      reader.unknownKeys(options, ConfigKeys.rule, 'rules.$code');
       result[rule] = reader.strings(options['exclude'], 'rules.$code.exclude');
     }
     return result;
