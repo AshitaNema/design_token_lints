@@ -1,4 +1,6 @@
-## Unreleased
+## 0.4.0
+
+Ecosystem: fit into the tools teams already use.
 
 - New `design_token_lints check-tokens` command and `design_tokens:` section:
   compares the Dart tokens with a design tokens file in the Design Tokens
